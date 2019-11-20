@@ -1,24 +1,32 @@
 package com.mcu.model
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.Field
 import java.util.*
 
+@Document(collection = "server")
 class Server {
-    var name : String? = null
-    var aws : Aws = Aws()
-    var minecraft : Minecraft = Minecraft()
-}
 
-class Aws {
-    var id : String? = null
-    var online : Boolean = false
-    var start : Date? = null
-    var update : Date? = null
-}
+    @Id lateinit var id : String
+    @Field lateinit var name : String
+    @Field var aws : Aws = Aws()
+    @Field var minecraft : Minecraft = Minecraft()
 
-class Minecraft {
-    var online : Boolean = false
-    var now : Int = 0
-    var max : Int = 0
-    var start : Date? = null
-    var update : Date? = null
+    @Document(collection = "server.aws")
+    class Aws {
+        @Field("id") var id : String? = null
+        var online : Boolean = false
+        var start : Date? = null
+        var update : Date? = null
+    }
+
+    @Document(collection = "server.minecraft")
+    class Minecraft {
+        var online : Boolean = false
+        var now : Int = 0
+        var max : Int = 0
+        var start : Date? = null
+        var update : Date? = null
+    }
 }
