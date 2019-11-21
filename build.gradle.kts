@@ -22,6 +22,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.amazonaws:aws-java-sdk-ec2:1.11.675")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-web")
