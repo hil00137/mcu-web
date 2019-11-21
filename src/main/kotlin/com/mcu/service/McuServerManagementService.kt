@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @EnableMongoRepositories(basePackages = ["com.mcu.repository"])
 @Service
-class MCUServerManagementService {
+class McuServerManagementService {
 
     @Autowired
     private lateinit var serverRepository: ServerRepository
@@ -17,7 +17,7 @@ class MCUServerManagementService {
         return serverRepository.findByName(name)
     }
 
-    fun getAllServerProperty(): MutableList<Server> {
+    fun getAllMcuServerList(): MutableList<Server> {
         return serverRepository.findAll()
     }
 
