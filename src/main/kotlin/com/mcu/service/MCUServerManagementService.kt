@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @EnableMongoRepositories(basePackages = ["com.mcu.repository"])
 @Service
-class ServerManagementService {
+class MCUServerManagementService {
 
     @Autowired
     private lateinit var serverRepository: ServerRepository
