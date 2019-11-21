@@ -10,6 +10,7 @@ class Server {
 
     @Id lateinit var id : String
     @Field lateinit var name : String
+    @Field lateinit var ip : String
     @Field var aws : Aws = Aws()
     @Field var minecraft : Minecraft = Minecraft()
 
