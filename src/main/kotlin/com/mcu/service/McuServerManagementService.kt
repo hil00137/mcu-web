@@ -21,9 +21,7 @@ class McuServerManagementService {
         return serverRepository.findAll()
     }
 
-    fun updateProperty(name: String ,online: Boolean): Server {
-        val server = findByName(name)
-        server.aws.online = online
+    fun updateProperty(server : Server): Server {
         return serverRepository.save(server)
     }
 }
