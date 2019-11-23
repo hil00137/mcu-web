@@ -1,6 +1,7 @@
 package com.mcu.web
 
-import com.mcu.service.ServerManagementService
+import com.mcu.service.McuServerManagementService
+import com.mcu.util.AwsConnector
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -9,21 +10,13 @@ import org.springframework.web.bind.annotation.RestController
 class WebRestController {
 
     @Autowired
-    lateinit var serverManagementService : ServerManagementService
+    lateinit var mcuServerManagementService : McuServerManagementService
+
+    @Autowired
+    lateinit var a : AwsConnector
 
     @GetMapping("/hello")
     fun hello(): String {
         return "HelloWorld"
-    }
-
-    @GetMapping("/server")
-    fun server(): String {
-        return serverManagementService.findByName("mcu_server_01").aws.online.toString()
-    }
-
-    @GetMapping("/update")
-    fun update(): String {
-        serverManagementService.updateProperty("mcu_server_01",false)
-        return "ok"
     }
 }
