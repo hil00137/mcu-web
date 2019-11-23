@@ -7,5 +7,5 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 
 interface ServerRepository : MongoRepository<Server, String> {
-    fun findByName(name : String) : Server
+    fun findByName(name : String) : Server?
 }

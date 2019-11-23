@@ -8,22 +8,20 @@ import org.springframework.stereotype.Service
 
 @EnableMongoRepositories(basePackages = ["com.mcu.repository"])
 @Service
-class ServerManagementService {
+class McuServerManagementService {
 
     @Autowired
     private lateinit var serverRepository: ServerRepository
 
-    fun findByName(name : String) : Server {
+    fun findByName(name : String) : Server? {
         return serverRepository.findByName(name)
     }
 
-    fun getAllServerProperty(): MutableList<Server> {
+    fun getAllMcuServerList(): MutableList<Server> {
         return serverRepository.findAll()
     }
 
-    fun updateProperty(name: String ,online: Boolean): Server {
-        val server = findByName(name)
-        server.aws.online = online
+    fun updateProperty(server : Server): Server {
         return serverRepository.save(server)
     }
 }
