@@ -20,6 +20,7 @@ class Server {
         var online : Boolean = false
         var start : Date? = null
         var update : Date? = null
+        var code : Int = 0
     }
 
     @Document(collection = "server.minecraft")
