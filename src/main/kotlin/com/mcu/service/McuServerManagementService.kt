@@ -13,7 +13,7 @@ class McuServerManagementService {
     @Autowired
     private lateinit var serverRepository: ServerRepository
 
-    fun findByName(name : String) : Server {
+    fun findByName(name : String) : Server? {
         return serverRepository.findByName(name)
     }
 
