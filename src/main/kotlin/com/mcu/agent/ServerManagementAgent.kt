@@ -74,6 +74,7 @@ class ServerManagementAgent {
                 server.ip = null.toString()
             }
         }
+        server.aws.code = instance.state.code
         server.aws.update = Calendar.getInstance().time
         mcuServerManagementService.updateProperty(server)
     }
