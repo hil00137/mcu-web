@@ -1,4 +1,4 @@
-package com.mcu.web
+package com.mcu.controller
 
 import com.mcu.service.AwsManagementService
 import com.mcu.service.McuServerManagementService
