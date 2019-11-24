@@ -38,7 +38,7 @@ class McuServerController {
         if (server.aws.code != 80) {
             return "서버를 시작할수 없는 상태입니다. 조금 있다가 다시 시작해주시길 바랍니다."
         }
-        var result = 0
+        val result : Int
         try {
              result = awsManagementService.startInstance(server.aws.id.toString())
         } catch (e: Exception) {
@@ -63,7 +63,7 @@ class McuServerController {
             return "서버를 끌 수 없는 상태입니다. 나중에 다시 시작해주시길 바랍니다."
         }
 
-        var result = 0
+        val result : Int
         try {
             result = awsManagementService.stopInstance(server.aws.id.toString())
         } catch (e : Exception) {
