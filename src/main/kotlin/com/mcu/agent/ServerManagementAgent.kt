@@ -5,6 +5,7 @@ import com.mcu.model.Server
 import com.mcu.service.AwsManagementService
 import com.mcu.service.McuServerManagementService
 import org.apache.commons.lang3.concurrent.BasicThreadFactory
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.lang.Exception
@@ -17,6 +18,10 @@ import javax.annotation.PreDestroy
 
 @Component
 class ServerManagementAgent {
+
+    companion object {
+        val logger = LoggerFactory.getLogger(this.javaClass)!!
+    }
 
     private lateinit var executorService : ExecutorService
 
@@ -47,12 +52,12 @@ class ServerManagementAgent {
                         total++
                     }
 
-                    println("Active Aws Server $active / $total")
+                    logger.info("Active Aws Server $active / $total")
                     Thread.sleep(5000)
                 }
 
             } catch (e : Exception) {
-                e.printStackTrace()
+                logger.error(e.message)
             }
         }
 

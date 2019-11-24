@@ -3,12 +3,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.2.1.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
+    id("war")
     kotlin("jvm") version "1.3.50"
     kotlin("plugin.spring") version "1.3.50"
 }
 
 group = "com.mcu"
-version = "0.1.0-SNAPSHOT"
+version = "0.1.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -17,11 +18,14 @@ configurations {
     }
 }
 
+
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation("ch.qos.logback:logback-classic")
     implementation("org.apache.commons:commons-lang3:3.9")
     implementation("com.amazonaws:aws-java-sdk-ec2:1.11.675")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -49,3 +53,4 @@ tasks.withType<KotlinCompile> {
         jvmTarget = "1.8"
     }
 }
+
