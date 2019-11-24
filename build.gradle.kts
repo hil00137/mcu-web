@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.mcu"
-version = "0.1.1-SNAPSHOT"
+version = "0.2.0-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -28,6 +28,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic")
     implementation("org.apache.commons:commons-lang3:3.9")
     implementation("com.amazonaws:aws-java-sdk-ec2:1.11.675")
+    implementation("org.springframework:spring-aop")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-web")
