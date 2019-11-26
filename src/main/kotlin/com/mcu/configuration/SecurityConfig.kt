@@ -33,7 +33,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity?) {
         http?:return
         http.authorizeRequests()
-                .antMatchers("/","/user/login","/error**").permitAll()
+                .antMatchers("/","/user/login","/error**","/css/**","/js/**").permitAll()
                 .antMatchers("/**").access("ROLE_USER")
                 .antMatchers("/**").access("ROLE_ADMIN")
                 .antMatchers("/**").authenticated()
