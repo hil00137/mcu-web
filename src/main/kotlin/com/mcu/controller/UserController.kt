@@ -3,6 +3,7 @@ package com.mcu.controller
 import com.mcu.model.User
 import com.mcu.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
@@ -27,11 +28,12 @@ class UserController {
     @PostMapping("/signUp")
     fun signUp(@RequestBody user: User?) : String {
         user?.let {
-            userService.registUser(it)?:"saved error"
+            userService.registerUser(it)?:"saved error"
         }?: return "error"
         return "OK"
     }
 
+    @Cacheable(value= ["userCache"], key = "#userId")
     @ResponseBody
     @GetMapping("/checkId/{userId}")
     fun idCheck(@PathVariable userId : String) : String {
@@ -43,6 +45,7 @@ class UserController {
         }
     }
 
+    @Cacheable(value = ["userCache"], key = "#nickname")
     @ResponseBody
     @GetMapping("/checkNickname/{nickname}")
     fun nicknameCheck(@PathVariable nickname : String) : String {
