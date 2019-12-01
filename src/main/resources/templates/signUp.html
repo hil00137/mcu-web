@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<head>
+    <title>마인크래프트 대학</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8;">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,  user-scalable=no">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap_ori.min.css}">
+    <script type="application/javascript" th:src="@{/js/jquery-3.4.1.min.js}"></script>
+    <script type="application/javascript" th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script type="application/javascript" th:src="@{/js/vue.min.js}"></script>
+<!--    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="https://npmcdn.com/axios/dist/axios.min.js"></script>
+
+</head>
+<body style="background-color: #f2f1f0;">
+    <form class="form-horizontal" style="width: 50%; margin:auto; margin-top: 10%;" id="signForm" @submit.prevent="submit">
+        <h1 style="text-align: center;"><a href="/user/login">마크대학</a></h1>
+        <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <div class="form-group">
+            <label for="userId" class="col-sm-2 control-label">아이디</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" v-model="userId" id="userId" placeholder="ID" v-on:focusout="idCheck" v-on:focusin="idCheckReset" required>
+            </div>
+        </div>
+        <div class="col-sm-offset-2"><p style="margin-left: 1%" :class="idMessageClass">{{idMessage}}</p></div>
+        <div class="form-group">
+            <label for="password" class="col-sm-2 control-label">비밀번호</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="password" v-model="password" id="password" v-on:focusout="pwdCheck" v-on:focusin="pwdCheckReset" required placeholder="PASSWORD">
+            </div>
+        </div>
+        <div class="col-sm-offset-2"><p style="margin-left: 1%" :class="pwdMessageClass">{{pwdMessage}}</p></div>
+        <div class="form-group">
+            <label for="passwordCheck" class="col-sm-2 control-label">비밀번호 확인</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="password" v-model="passwordCheck" id="passwordCheck" required v-on:focusout="pwd2Check" v-on:focusin="pwd2CheckRest" placeholder="PASSWORD CHECK">
+            </div>
+        </div>
+        <div class="col-sm-offset-2"><p style="margin-left: 1%" :class="pwdCheckMessageClass">{{pwdCheckMessage}}</p></div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="nickname">닉네임</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" required id="nickname" v-model="nickname" placeholder="NICKNAME" v-on:focusout="nicknameCheck" v-on:focusin="nicknameCheckReset">
+            </div>
+        </div>
+        <div class="col-sm-offset-2"><p style="margin-left: 1%" :class="nicknameMessageClass">{{nicknameMessage}}</p></div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="email">이메일</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="email" v-model="email" id="email" required placeholder="E-MAIL">
+            </div>
+        </div>
+        <div class="col-sm-offset-2"><p style="margin-left: 1%" class="text-info">이메일은 비밀번호를 찾을때 사용됩니다.</p></div>
+        <div class="form-group">
+            <button class="col-sm-offset-3 col-sm-6 btn btn-primary">가입하기</button>
+        </div>
+        <div class="col-sm-offset-2"><p style="margin-left: 1%" class="text-danger">{{submitMessage}}</p></div>
+    </form>
+    <script>
+        let idChecked = false;
+        let pwdChecked = false;
+        let pwd2Checked = false;
+        let nicknameChecked = false;
+
+
+        new Vue({
+            el : "#signForm",
+            data : {
+                userId : '',
+                password : '',
+                passwordCheck : '',
+                nickname : '',
+                email : '',
+                idMessage : "아이디는 숫자와 소문자로 5~12자리로 만들어주세요. ",
+                idMessageClass : 'text-info',
+                pwdMessage : "문자, 숫자, 특수문자를 포함하여 8~12자리로 만들어주세요",
+                pwdMessageClass : 'text-info',
+                pwdCheckMessage : "",
+                pwdCheckMessageClass : '',
+                submitMessage : "",
+                nicknameMessage : "닉네임은 최대 10자리까지 입력가능합니다.",
+                nicknameMessageClass : 'text-info'
+            },
+            methods : {
+                idCheck : function() {
+                    this.userId = this.userId.toLowerCase();
+                    const test = /[a-z0-9A-Z]{5,12}/.exec(this.userId);
+                    if(test == null || test[0] !== this.userId) {
+                        this.idMessage = '아이디는 숫자와 영어로 5~12자리로 만들어주세요.';
+                        this.idMessageClass = 'text-danger';
+                        idChecked = false;
+                        return false;
+                    }
+                    axios.get('/user/checkId/'+this.userId)
+                    .then(value => {
+                        if(value.data === "OK") {
+                            this.idMessage = '사용가능한 아이디입니다';
+                            this.idMessageClass = 'text-primary';
+                            idChecked = true;
+                        } else {
+                            this.idMessage = '중복된 아이디입니다.';
+                            this.idMessageClass = 'text-danger';
+                            idChecked = false;
+                        }
+                    });
+                },
+                idCheckReset : function() {
+                    idChecked = false;
+                },
+                pwdCheck : function() {
+                    const test = /^.*(?=^.{8,12}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/.exec(this.password);
+                    if(test == null) {
+                        this.pwdMessage = '문자, 숫자, 특수문자를 포함하여 8~12자리로 만들어주세요';
+                        this.pwdMessageClass = 'text-danger';
+                        pwdChecked = false;
+                        return false;
+                    } else {
+                        this.pwdMessage = '사용 가능한 비밀번호 입니다.';
+                        this.pwdMessageClass = 'text-primary';
+                        pwdChecked = true;
+                    }
+                },
+                pwdCheckReset : function() {
+                    pwdChecked = false;
+                },
+                pwd2Check : function() {
+                    if(this.password !== this.passwordCheck) {
+                        this.pwdCheckMessage = '비밀번호 확인이 일치하지 않습니다.';
+                        this.pwdCheckMessageClass = 'text-danger';
+                        pwd2Checked = false;
+                        return false;
+                    } else {
+                        this.pwdCheckMessage = '일치합니다.';
+                        this.pwdCheckMessageClass = 'text-primary';
+                        pwd2Checked = true;
+                    }
+                },
+                pwd2CheckRest : function() {
+                    pwd2Checked = false;
+                },
+                nicknameCheck : function() {
+                    this.nickname = this.nickname.trim();
+                    if(this.nickname === "") {
+                        nicknameChecked = false;
+                        this.nicknameMessage = "공백 닉네임은 허용되지 않습니다.";
+                        this.nicknameMessageClass = 'text-danger';
+                        return false;
+                    }
+                    if (this.nickname.length > 10) {
+                        nicknameChecked = false;
+                        this.nicknameMessage = "닉네임 길이가 너무 깁니다.";
+                        this.nicknameMessageClass = 'text-danger';
+                        return false;
+                    }
+                    axios.get('/user/checkNickname/'+this.nickname)
+                        .then(value => {
+                            if(value.data === "OK") {
+                                this.nicknameMessage = "사용가능한 닉네임입니다.";
+                                this.nicknameMessageClass = 'text-primary';
+                                nicknameChecked = true;
+                            } else {
+                                this.nicknameMessage = "중복된 닉네임입니다.";
+                                this.nicknameMessageClass = 'text-danger';
+                                nicknameChecked = false;
+                            }
+                        });
+                },
+                nicknameCheckReset : function() {
+                    nicknameChecked = false;
+                },
+                submit : function() {
+                    if(!idChecked || !pwdChecked || !pwd2Checked || !nicknameChecked) {
+                        this.submitMessage = "입력되지 않은 항목이 있습니다.";
+                        return false;
+                    } else {
+                        axios.post('/user/signUp', {
+                                userId : this.userId,
+                                nickname : this.nickname,
+                                password : this.password,
+                                email : this.email
+                            },
+                            {
+                                headers: {
+                                    "X-CSRF-TOKEN": document.getElementById("csrf").value
+                                }
+                            }
+                        ).then(value => {
+                            if(value.data === "OK") {
+                                alert("회원가입이 완료되었습니다.");
+                                location.href = "/user/login";
+                            } else {
+                                alert(value.data);
+                            }
+                        }).catch(reason => {
+                            return false;
+                        });
+
+                    }
+                }
+
+            }
+        })
+    </script>
+</body>
+</html>
