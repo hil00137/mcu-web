@@ -29,6 +29,7 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-ec2:1.11.675")
     implementation("org.springframework:spring-aop")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("net.sf.ehcache:ehcache:2.9.0")
     implementation("org.springframework.boot:spring-boot-starter-security")
