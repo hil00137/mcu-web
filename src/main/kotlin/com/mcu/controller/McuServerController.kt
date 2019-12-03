@@ -19,13 +19,18 @@ class McuServerController {
     lateinit var awsManagementService : AwsManagementService
 
     @GetMapping("/status/{serverName}")
-    fun serverStatus(@PathVariable serverName : String): String {
-        val server = mcuServerManagementService.findByName(serverName) ?: return "No matching server."
+    fun serverStatus(@PathVariable serverName : String): Map<String, String> {
+        val server = mcuServerManagementService.findByName(serverName) ?: return HashMap()
         val map = HashMap<String, String>()
-        map["online"] = server.aws.online.toString()
-        map["public_ip"] = server.ip
+        map["name"] = server.name
+        map["online"] =  if (server.aws.online) {
+            "on"
+        } else {
+            "off"
+        }
+        map["ip"] = server.ip
         map["started"] = server.aws.start?.toString()?:"Stopped"
-        return map.toString()
+        return map
     }
 
     @GetMapping("/start/{serverName}")
