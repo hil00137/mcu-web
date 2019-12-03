@@ -1,9 +1,83 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="/layout/default.html">
+      layout:decorator="layout/default.html" xmlns:v-on="http://www.w3.org/1999/xhtml">
 <head>
 </head>
 <body>
-    마인크래프트 대학 홈페이지
+    <th:block layout:fragment="content">
+        마인크래프트 대학 홈페이지
+        <div class="panel panel-info" id="serverPanel">
+            <div class="panel-heading">서버 상태</div>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>name</th>
+                        <th>ip</th>
+                        <th>online</th>
+                        <th>etc</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>1</th>
+                        <th>{{server.name}}</th>
+                        <th>{{server.ip}}</th>
+                        <th :class="serverOnline">{{server.online}}</th>
+                        <th><button v-if="server.online === 'off'" type="button" class="btn btn-success" @click="serverStart(server.name, $event)">서버구동</button></th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+    <th:block layout:fragment="script">
+        <script>
+            new Vue({
+                el : "#serverPanel",
+                data : {
+                    server : {
+                        name : '',
+                        ip : '',
+                        online: 'off'
+                    },
+                    serverOnline : ''
+                },
+                methods : {
+                    updateServerStatus : function() {
+                        this.interval = setInterval(function(){
+                            this.refreshServer();
+                        }.bind(this), 5000);
+                    },
+                    refreshServer : function() {
+                        axios.get('/server/status/mcu_server_01')
+                            .then(value => {
+                                this.server = value.data;
+                                if(this.server.online === 'on') {
+                                    this.serverOnline = 'success';
+                                } else {
+                                    this.serverOnline = '';
+                                }
+                            });
+                    },
+                    serverStart : function(serverName, event) {
+                        event.target.disabled = true;
+                        axios.get('/server/start/'+serverName)
+                            .then(value => {
+                                console.log(value.data);
+                            });
+                    }
+                },
+                created : function() {
+                    this.refreshServer()
+                },
+                mounted : function () {
+                    this.updateServerStatus();
+                },
+                destroyed() {
+                    clearInterval(this.interval);
+                }
+            });
+        </script>
+    </th:block>
 </body>
 </html>
