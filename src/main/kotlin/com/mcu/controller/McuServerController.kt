@@ -45,7 +45,7 @@ class McuServerController {
         }
         val result : Int
         try {
-             result = awsManagementService.startInstance(server.aws.id.toString())
+             result = awsManagementService.startInstance(server.aws.awsId.toString())
         } catch (e: Exception) {
             e.printStackTrace()
             return "재시도 하여주시길 바랍니다. 지속적인 발생시 관리자에게 문의 바랍니다."
@@ -58,7 +58,6 @@ class McuServerController {
         }
     }
 
-    @GetMapping("/stop/{serverName}")
     fun stopServer(@PathVariable serverName: String) : String {
         val server = mcuServerManagementService.findByName(serverName) ?: return "No matching server"
         if (!server.aws.online) {
@@ -70,7 +69,7 @@ class McuServerController {
 
         val result : Int
         try {
-            result = awsManagementService.stopInstance(server.aws.id.toString())
+            result = awsManagementService.stopInstance(server.aws.awsId.toString())
         } catch (e : Exception) {
             e.printStackTrace()
             return "재시도 하여주시길 바랍니다. 지속적인 발생시 관리자에게 문의 바랍니다."
