@@ -23,12 +23,14 @@ class McuServerController {
         val server = mcuServerManagementService.findByName(serverName) ?: return HashMap()
         val map = HashMap<String, String>()
         map["name"] = server.name
-        map["online"] =  if (server.aws.online) {
+        map["online"] =  if (server.minecraft.online) {
             "on"
         } else {
             "off"
         }
+        map["link"] = server.minecraft.link
         map["ip"] = server.ip
+        map["user"] = "${server.minecraft.now}/${server.minecraft.max}"
         map["started"] = server.aws.start?.toString()?:"Stopped"
         return map
     }
