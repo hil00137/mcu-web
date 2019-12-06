@@ -87,6 +87,7 @@ class ServerManagementAgent {
             }
             else -> {
                 server.aws.online = false
+                server.minecraft.online = false
                 server.aws.start = null
                 server.ip = null.toString()
             }

@@ -13,20 +13,22 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
-                        <th>#</th>
                         <th>name</th>
+                        <th>download</th>
                         <th>ip</th>
                         <th>online</th>
+                        <th>user</th>
                         <th>etc</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr>
-                        <th>1</th>
                         <th>{{server.name}}</th>
+                        <th><a href="#" @click="download">link</a></th>
                         <th>{{server.ip}}</th>
                         <th :class="serverOnline">{{server.online}}</th>
-                        <th><button v-if="server.online === 'off'" type="button" class="btn btn-success" @click="serverStart(server.name, $event)">서버구동</button></th>
+                        <th>{{server.user}}</th>
+                        <th><button v-if="server.ip === 'null'" type="button" class="btn btn-success" @click="serverStart(server.name, $event)">서버구동</button></th>
                     </tr>
                     </tbody>
                 </table>
@@ -41,7 +43,9 @@
                     server : {
                         name : '',
                         ip : '',
-                        online: 'off'
+                        online: 'off',
+                        user: '',
+                        link: ''
                     },
                     serverOnline : ''
                 },
@@ -68,6 +72,9 @@
                             .then(value => {
                                 console.log(value.data);
                             });
+                    },
+                    download : function() {
+                        window.open(this.server.link,"_blank");
                     }
                 },
                 created : function() {

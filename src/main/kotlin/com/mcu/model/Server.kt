@@ -30,5 +30,6 @@ class Server {
         var max : Int = 0
         var zeroTime : LocalDateTime? = null
         var update : LocalDateTime? = null
+        @Field var link : String = ""
     }
 }
