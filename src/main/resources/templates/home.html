@@ -78,7 +78,8 @@
                     }
                 },
                 created : function() {
-                    this.refreshServer()
+                    this.refreshServer();
+                    document.getElementById("headerHome").appendChild("<span class='sr-only'>(current)</span>");
                 },
                 mounted : function () {
                     this.updateServerStatus();
@@ -87,6 +88,7 @@
                     clearInterval(this.interval);
                 }
             });
+
         </script>
     </th:block>
 </body>
