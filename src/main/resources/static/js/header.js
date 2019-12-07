@@ -6,6 +6,9 @@ new Vue({
             if(check) {
                 location.href = "/user/logout";
             }
+        },
+        goHome: function() {
+            location.href ="/home";
         }
     }
 });
