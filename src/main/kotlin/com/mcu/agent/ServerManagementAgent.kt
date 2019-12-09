@@ -3,6 +3,7 @@ package com.mcu.agent
 import com.amazonaws.services.ec2.model.Instance
 import com.mcu.model.Server
 import com.mcu.service.AwsManagementService
+import com.mcu.service.HistoryService
 import com.mcu.service.McuServerManagementService
 import org.apache.commons.lang3.concurrent.BasicThreadFactory
 import org.slf4j.LoggerFactory
@@ -37,6 +38,9 @@ class ServerManagementAgent {
 
     @Autowired
     private lateinit var mcuServerManagementService : McuServerManagementService
+
+    @Autowired
+    private lateinit var historyService: HistoryService
 
     @PostConstruct
     fun start() {
@@ -118,8 +122,9 @@ class ServerManagementAgent {
             } else if(server.minecraft.zeroTime != null) {
                 val gap= ChronoUnit.MINUTES.between(server.minecraft.zeroTime, server.minecraft.update)
                 if (gap >= 3) {
-                    println(property[1]+" 끄셈")
+                    logger.info("Server Shutdown")
                     awsManagementService.stopInstance(server.aws.awsId.toString())
+                    historyService.writeHistoryAsSystem("Server Shutdown")
                 }
             }
         } else {

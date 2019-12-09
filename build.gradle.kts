@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.mcu"
-version = "0.3.1-SNAPSHOT"
+version = "0.3.2-RELEASE"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
