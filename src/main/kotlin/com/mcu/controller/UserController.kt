@@ -1,6 +1,8 @@
 package com.mcu.controller
 
+import com.mcu.model.History
 import com.mcu.model.User
+import com.mcu.service.HistoryService
 import com.mcu.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
@@ -13,6 +15,8 @@ class UserController {
 
     @Autowired
     lateinit var userService : UserService
+    @Autowired
+    lateinit var historyService: HistoryService
 
     @GetMapping("/login")
     fun goLoginPage() : String {
@@ -30,6 +34,7 @@ class UserController {
         user?.let {
             userService.registerUser(it)?:"saved error"
         }?: return "error"
+        historyService.writeHistory("Sign Up ${user.userId}",History.SYSTEM)
         return "OK"
     }
 

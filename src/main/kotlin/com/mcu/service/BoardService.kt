@@ -2,6 +2,7 @@ package com.mcu.service
 
 import com.mcu.model.Board
 import com.mcu.model.BoardType
+import com.mcu.model.History
 import com.mcu.repository.BoardRepository
 import com.mcu.util.DateUtil
 import com.mcu.util.StringUtil
@@ -20,6 +21,9 @@ class BoardService {
 
     @Autowired
     lateinit var boardRepository: BoardRepository
+
+    @Autowired
+    lateinit var historyService: HistoryService
 
     /**
      * 해당 게시판의 게시글 개수
@@ -47,12 +51,14 @@ class BoardService {
         if (StringUtil.isScriptInjection(board.subject)) {
             logger.warn("Script Injection occurred by ${board.userId}")
             board.subject = StringUtil.removeLabel(board.subject)
+            historyService.writeHistory("Script Injection", History.RULE_OVER)
         }
         
         board.content = StringUtil.checkScriptInjection(board.content)
         if (StringUtil.isScriptInjection(board.content)) {
             logger.warn("Script Injection occurred by ${board.userId}")
             board.content = StringUtil.removeLabel(board.content)
+            historyService.writeHistory("Script Injection", History.RULE_OVER)
         }
         return boardRepository.save(board)
     }

@@ -1,7 +1,10 @@
 package com.mcu.controller
 
+import com.mcu.model.History
 import com.mcu.service.AwsManagementService
+import com.mcu.service.HistoryService
 import com.mcu.service.McuServerManagementService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -12,11 +15,18 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/server")
 class McuServerController {
 
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+    }
+
     @Autowired
     lateinit var mcuServerManagementService : McuServerManagementService
 
     @Autowired
     lateinit var awsManagementService : AwsManagementService
+
+    @Autowired
+    lateinit var historyService: HistoryService
 
     @GetMapping("/status/{serverName}")
     fun serverStatus(@PathVariable serverName : String): Map<String, String> {
@@ -47,7 +57,9 @@ class McuServerController {
         }
         val result : Int
         try {
-             result = awsManagementService.startInstance(server.aws.awsId.toString())
+            result = awsManagementService.startInstance(server.aws.awsId.toString())
+            logger.info("Sever Start")
+            historyService.writeHistory("Server Start", History.USER_REQUEST)
         } catch (e: Exception) {
             e.printStackTrace()
             return "재시도 하여주시길 바랍니다. 지속적인 발생시 관리자에게 문의 바랍니다."
