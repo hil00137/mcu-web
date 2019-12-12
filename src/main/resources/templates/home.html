@@ -81,7 +81,7 @@
                     <tr>
                         <th class="text-center" >제목</th>
                         <th class="text-center">내용</th>
-                        <th class="text-center">아이디</th>
+                        <th class="text-center">닉네임</th>
                         <th class="text-center">등록일자</th>
                         <th class="text-center">수정일자</th>
                     </tr>
@@ -90,7 +90,7 @@
                     <tr v-for="row in list">
                         <th class="text-center">{{row.subject}}</th>
                         <th>{{row.content}}</th>
-                        <th class="text-center">{{row.userId}}</th>
+                        <th class="text-center">{{row.nickname}}</th>
                         <th class="text-center">{{row.formattedRegist}}</th>
                         <th class="text-center">{{row.formattedUpdate}}</th>
                     </tr>
@@ -187,6 +187,7 @@
                     list : [{
                         content: "",
                         userId: "",
+                        nickname : "",
                         subject: "",
                         formattedRegist : "",
                         formattedUpdate: ""
