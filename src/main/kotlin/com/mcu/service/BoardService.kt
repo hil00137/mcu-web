@@ -25,6 +25,8 @@ class BoardService {
     @Autowired
     lateinit var historyService: HistoryService
 
+    @Autowired
+    lateinit var userService: UserService
     /**
      * 해당 게시판의 게시글 개수
      */
@@ -36,6 +38,7 @@ class BoardService {
     fun getBoards(type : BoardType, page : Int): List<Board> {
         val list = boardRepository.findAllByType(type.type, PageRequest.of(page, 10, Sort.by("id").descending()))
         list.forEach {
+            it.userId.let { userId -> it.nickname = userService.getUserById(userId)?.nickname?:"" }
             it.regist?.let { regist -> it.formattedRegist = DateUtil.transform(regist)  }
             it.update?.let { update -> it.formattedUpdate = DateUtil.transform(update)  }
         }

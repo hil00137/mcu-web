@@ -1,10 +1,11 @@
 package com.mcu.model
 
 import org.springframework.data.mongodb.core.mapping.Document
+import java.io.Serializable
 import java.time.LocalDateTime
 
 @Document(collection = "user")
-class User {
+class User : Serializable {
     var userId : String = ""
     var password : String = ""
     var auth : String = "common"

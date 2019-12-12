@@ -38,7 +38,6 @@ class UserController {
         return "OK"
     }
 
-    @Cacheable(value= ["userCache"], key = "#userId")
     @ResponseBody
     @GetMapping("/checkId/{userId}")
     fun idCheck(@PathVariable userId : String) : String {
