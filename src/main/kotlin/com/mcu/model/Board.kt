@@ -18,6 +18,8 @@ class Board : Serializable {
     var update : LocalDateTime? = LocalDateTime.now()   // 수정일자
     var formattedRegist : String? = null                // 정해진 양식의 작성일자 : 웹 출력용
     var formattedUpdate : String? = null                // 정해진 양식의 수정일자 : 웹 출력용
+    var delete : Boolean = false                        // 삭제 여부
+    var deleteDate : LocalDateTime? = null
 }
 
 /**

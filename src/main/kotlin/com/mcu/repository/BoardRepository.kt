@@ -6,6 +6,6 @@ import org.springframework.data.repository.PagingAndSortingRepository
 
 
 interface BoardRepository : PagingAndSortingRepository<Board, String> {
-    fun countByType(type : String) : Long
-    fun findAllByType(type: String, pageable: Pageable) : List<Board>
+    fun countByTypeAndDelete(type : String, delete: Boolean) : Long
+    fun findAllByTypeAndDelete(type: String, delete : Boolean, pageable: Pageable) : List<Board>
 }

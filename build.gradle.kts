@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.mcu"
-version = "0.3.3-RELEASE"
+version = "0.3.4-RELEASE"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -30,6 +30,7 @@ dependencies {
     implementation("org.springframework:spring-aop")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
+    implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity5:3.0.4.RELEASE")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("net.sf.ehcache:ehcache:2.9.0")
     implementation("org.springframework.boot:spring-boot-starter-security")
