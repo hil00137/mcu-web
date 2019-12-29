@@ -10,4 +10,9 @@ class WebCommonController {
     fun home(): String {
         return "home"
     }
+
+    @GetMapping("/guide")
+    fun guide(): String {
+        return "guide"
+    }
 }

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="~{layout/afterLogin.html}" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="container">
+        <h3>가이드 영상</h3>
+        <iframe style="width: 100%" height="720" src="https://www.youtube.com/embed/JQfei_08PLQ" frameborder="0"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+    </div>
+</th:block>
+<th:block layout:fragment="script">
+</th:block>
+</body>
+</html>
