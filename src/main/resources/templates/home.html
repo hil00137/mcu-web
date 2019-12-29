@@ -1,247 +1,280 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorator="~{layout/afterLogin.html}" xmlns:v-on="http://www.w3.org/1999/xhtml"
-      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 </head>
 <body>
-    <th:block layout:fragment="content">
-        <!--
+<th:block layout:fragment="content">
+    <input type="hidden" id="loginUserId" th:value="${#authentication.principal}"/>
+    <!--
             서버 상태 패널
         -->
-        <div class="container">
-            <div class="panel panel-info" id="serverPanel">
-                <div class="panel-heading" style="padding-bottom:0px; padding-right:10px"><h1>서버 상태</h1>
-                    <p class="text-right" style="margin-bottom:2px; font-size:10pt">서버에 사람이 없을 경우 3분뒤 종료됩니다</p>
-                </div>
-                <table class="table table-bordered table-hover">
-                    <colgroup>
-                        <col span="1" style="width: 10%">
-                        <col span="1" style="width: 10%">
-                        <col span="1" style="width: 10%">
-                        <col span="1" style="width: 10%">
-                        <col span="1" style="width: 10%">
-                        <col span="1" style="width: 10%">
-                    </colgroup>
-                    <thead>
-                    <tr>
-                        <th class="text-center">서버이름</th>
-                        <th class="text-center">모드팩</th>
-                        <th class="text-center">서버IP</th>
-                        <th class="text-center">online</th>
-                        <th class="text-center">접속인원</th>
-                        <th class="text-center">서버On</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <th class="text-center">{{server.name}}</th>
-                        <th class="text-center"><a href="#" @click="download">link</a></th>
-                        <th class="text-center">{{server.ip}}</th>
-                        <th class="text-center" :class="serverOnline">{{server.online}}</th>
-                        <th class="text-center">{{server.user}}</th>
-                        <th class="text-center"><button v-if="server.ip === 'null'" type="button" class="btn btn-success" @click="serverStart(server.name, $event)">서버구동</button></th>
-                    </tr>
-                    </tbody>
-                </table>
+    <div class="container">
+        <div class="panel panel-info" id="serverPanel">
+            <div class="panel-heading" style="padding-bottom:0px; padding-right:10px"><h1>서버 상태</h1>
+                <p class="text-right" style="margin-bottom:2px; font-size:10pt">서버에 사람이 없을 경우 3분뒤 종료됩니다</p>
             </div>
-        </div>
-        <div class="container">
-            <div class="panel panel-default" id="suggestionBoard">
-                <!-- Default panel contents -->
-                <div class="panel-heading">
-                    <div>
-                        <button id="suggestionBoardWriteButton" style="float: right;" class="btn btn-default" data-toggle="collapse" data-target="#suggestionSubmit">
-                            글쓰기
+            <table class="table table-bordered table-hover">
+                <colgroup>
+                    <col span="1" style="width: 10%">
+                    <col span="1" style="width: 10%">
+                    <col span="1" style="width: 10%">
+                    <col span="1" style="width: 10%">
+                    <col span="1" style="width: 10%">
+                    <col span="1" style="width: 10%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th class="text-center">서버이름</th>
+                    <th class="text-center">모드팩</th>
+                    <th class="text-center">서버IP</th>
+                    <th class="text-center">online</th>
+                    <th class="text-center">접속인원</th>
+                    <th class="text-center">서버On</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th class="text-center">{{server.name}}</th>
+                    <th class="text-center"><a href="#" @click="download">link</a></th>
+                    <th class="text-center">{{server.ip}}</th>
+                    <th class="text-center" :class="serverOnline">{{server.online}}</th>
+                    <th class="text-center">{{server.user}}</th>
+                    <th class="text-center">
+                        <button v-if="server.ip === 'null'" type="button" class="btn btn-success"
+                                @click="serverStart(server.name, $event)">서버구동
                         </button>
-                        <h3>건의 게시판</h3>
-                    </div>
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="container">
+        <div class="panel panel-default" id="suggestionBoard">
+            <!-- Default panel contents -->
+            <div class="panel-heading">
+                <div>
+                    <button id="suggestionBoardWriteButton" style="float: right;" class="btn btn-default"
+                            data-toggle="collapse" data-target="#suggestionSubmit">
+                        글쓰기
+                    </button>
+                    <h3>건의 게시판</h3>
                 </div>
-                <div class="panel-body collapse" id="suggestionSubmit">
-                    <form class="form-group">
-                        <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <label for="subject">제목</label>
-                        <input type="text" class="form-control" v-model="subject" id="subject" maxlength="50">
-                        <br>
-                        <label for="content">내용</label>
-                        <textarea class="form-control" rows="20" v-model="content" id="content"></textarea>
-                        <button style="float: right; margin: 10px" class="btn btn-primary" type="button" @click="write" value="">작성</button>
-                    </form>
-                </div>
-                <!-- Table -->
-                <table class="table table-bordered table-hover">
-                    <colgroup>
-                        <col span="1" style="width: 20%">
-                        <col span="1" style="width: 50%">
-                        <col span="1" style="width: 10%">
-                        <col span="1" style="width: 10%">
-                        <col span="1" style="width: 10%">
-                    </colgroup>
-                    <thead>
-                    <tr>
-                        <th class="text-center" >제목</th>
-                        <th class="text-center">내용</th>
-                        <th class="text-center">닉네임</th>
-                        <th class="text-center">등록일자</th>
-                        <th class="text-center">수정일자</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="row in list">
-                        <th class="text-center">{{row.subject}}</th>
-                        <th>{{row.content}}</th>
-                        <th class="text-center">{{row.nickname}}</th>
-                        <th class="text-center">{{row.formattedRegist}}</th>
-                        <th class="text-center">{{row.formattedUpdate}}</th>
-                    </tr>
-                    </tbody>
-                </table>
-                <div class="panel-footer">
-                    <div class="text-center">
-                        <ul class="pagination" style="margin:0">
-                            <li v-bind:class="{ 'disabled':page === 1 }">
-                                <a href="#" aria-label="Previous" @click="getList(1)">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <li><a href="#" v-if="page-2 > 0" @click="getList(page-2)">{{page-2}}</a></li>
-                            <li><a href="#" v-if="page-1 > 0" @click="getList(page-1)">{{page-1}}</a></li>
-                            <li class="active"><a href="#" @click="getList(page)">{{page}} <span class="sr-only">(current)</span></a></li>
-                            <li><a href="#" v-if="page*10 < count" @click="getList(page+1)">{{page+1}}</a></li>
-                            <li><a href="#" v-if="(page+1)*10 < count" @click="getList(page+2)">{{page+2}}</a></li>
-                            <li v-bind:class="{'disabled':page === lastPage}">
-                                <a href="#" aria-label="Next" @click="getList(lastPage)">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+            </div>
+            <div class="panel-body collapse" id="suggestionSubmit">
+                <form class="form-group">
+                    <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <label for="subject">제목</label>
+                    <input type="text" class="form-control" v-model="subject" id="subject" maxlength="50">
+                    <br>
+                    <label for="content">내용</label>
+                    <textarea class="form-control" rows="20" v-model="content" id="content"></textarea>
+                    <button style="float: right; margin: 10px" class="btn btn-primary" type="button" @click="write"
+                            value="">작성
+                    </button>
+                </form>
+            </div>
+            <!-- Table -->
+            <table class="table table-bordered table-hover">
+                <colgroup>
+                    <col span="1" style="width: 20%">
+                    <col span="1" style="width: 50%">
+                    <col span="1" style="width: 10%">
+                    <col span="1" style="width: 10%">
+                    <col span="1" style="width: 10%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th class="text-center">제목</th>
+                    <th class="text-center">내용</th>
+                    <th class="text-center">닉네임</th>
+                    <th class="text-center">등록일자</th>
+                    <th class="text-center">글삭제</th>
+                    <th sec:authorize="hasRole('ROLE_ADMIN')" class="text-center">운영자삭제</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="row in list">
+                    <th class="text-center">{{row.subject}}</th>
+                    <th>{{row.content}}</th>
+                    <th class="text-center">{{row.nickname}}</th>
+                    <th class="text-center">{{row.formattedRegist}}</th>
+                    <th class="text-center">
+                        <a href="#" v-if="row.userId == loginUserId" type="button" @click="deleteBoard(row.id)">삭제</a>
+                    </th>
+                    <th sec:authorize="hasRole('ROLE_ADMIN')"  class="text-center">
+                        <a href="#" class="btn btn-primary" type="button" @click="deleteBoard(row.id)">삭제</a>
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+            <div class="panel-footer">
+                <div class="text-center">
+                    <ul class="pagination" style="margin:0">
+                        <li v-bind:class="{ 'disabled':page === 1 }">
+                            <a href="#" aria-label="Previous" @click="getList(1)">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li><a href="#" v-if="page-2 > 0" @click="getList(page-2)">{{page-2}}</a></li>
+                        <li><a href="#" v-if="page-1 > 0" @click="getList(page-1)">{{page-1}}</a></li>
+                        <li class="active"><a href="#" @click="getList(page)">{{page}} <span
+                                class="sr-only">(current)</span></a></li>
+                        <li><a href="#" v-if="page*10 < count" @click="getList(page+1)">{{page+1}}</a></li>
+                        <li><a href="#" v-if="(page+1)*10 < count" @click="getList(page+2)">{{page+2}}</a></li>
+                        <li v-bind:class="{'disabled':page === lastPage}">
+                            <a href="#" aria-label="Next" @click="getList(lastPage)">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </th:block>
-    <th:block layout:fragment="script">
-        <script>
-            const serverVue = new Vue({
-                el: "#serverPanel",
-                data: {
-                    server: {
-                        name: '',
-                        ip: '',
-                        online: 'off',
-                        user: '',
-                        link: ''
-                    },
-                    serverOnline: ''
+    </div>
+</th:block>
+<th:block layout:fragment="script">
+    <script>
+        const serverVue = new Vue({
+            el: "#serverPanel",
+            data: {
+                server: {
+                    name: '',
+                    ip: '',
+                    online: 'off',
+                    user: '',
+                    link: ''
                 },
-                methods: {
-                    updateServerStatus: function () {
-                        this.interval = setInterval(function () {
-                            this.refreshServer();
-                        }.bind(this), 5000);
-                    },
-                    refreshServer: function () {
-                        axios.get('/server/status/mcu_server_01')
-                            .then(value => {
-                                this.server = value.data;
-                                if (this.server.online === 'on') {
-                                    this.serverOnline = 'success';
-                                } else {
-                                    this.serverOnline = '';
-                                }
-                            });
-                    },
-                    serverStart: function (serverName, event) {
-                        event.target.disabled = true;
-                        axios.get('/server/start/' + serverName)
-                            .then(value => {
-                                // console.log(value.data);
-                            });
-                    },
-                    download: function () {
-                        window.open(this.server.link, "_blank");
-                    }
+                serverOnline: ''
+            },
+            methods: {
+                updateServerStatus: function () {
+                    this.interval = setInterval(function () {
+                        this.refreshServer();
+                    }.bind(this), 5000);
                 },
-                created: function () {
-                    this.refreshServer();
-                },
-                mounted: function () {
-                    this.updateServerStatus();
-                    const span = document.createElement("span");
-                    span.setAttribute("calss","sr-only");
-                    document.getElementById("headerHome").appendChild(span);
-                },
-                destroyed() {
-                    clearInterval(this.interval);
-                }
-            });
-            const suggetVue = new Vue({
-                el : "#suggestionBoard",
-                data : {
-                    subject: "",
-                    content: "",
-                    page: 1,
-                    type: "suggestion",
-                    count: 0,
-                    lastPage : 0,
-                    list : [{
-                        content: "",
-                        userId: "",
-                        nickname : "",
-                        subject: "",
-                        formattedRegist : "",
-                        formattedUpdate: ""
-                        }
-                    ]
-
-                },
-                methods : {
-                    getList: function(page) {
-                        const index = page - 1;
-                        axios.get('/board/' + this.type + '/' + index)
-                            .then(value => {
-                                this.list = value.data.list;
-                                this.page = value.data.page + 1;
-                                this.count = value.data.count;
-                                this.lastPage = Math.floor((this.count-1) / 10) + 1;
-                            })
-                    },
-                    write : function() {
-                        if(this.subject.trim() === "") {
-                            alert("제목을 입력해주시길 바랍니다.");
-                            return;
-                        }
-                        if(this.content.length > 1000) {
-                            alert("내용이 너무 깁니다.");
-                            return;
-                        }
-                        axios.post('/board/' + this.type,{
-                            type : this.type,
-                            subject : this.subject,
-                            content : this.content
-                        },{
-                            headers: {
-                                "X-CSRF-TOKEN": document.getElementById("csrf").value
+                refreshServer: function () {
+                    axios.get('/server/status/mcu_server_01')
+                        .then(value => {
+                            this.server = value.data;
+                            if (this.server.online === 'on') {
+                                this.serverOnline = 'success';
+                            } else {
+                                this.serverOnline = '';
                             }
-                        })
-                            .then(value => {
-                                if(value.data === "success") {
-                                    this.getList(this.page);
-                                    document.getElementById("suggestionBoardWriteButton").click();
-                                    this.subject = "";
-                                    this.content = "";
-                                } else {
-                                    alert("에러가 발생하였습니다.");
-                                }
-                            });
-                        }
-                    }
-                ,
-                mounted : function() {
-                   this.getList(1);
+                        });
+                },
+                serverStart: function (serverName, event) {
+                    event.target.disabled = true;
+                    axios.get('/server/start/' + serverName)
+                        .then(value => {
+                            // console.log(value.data);
+                        });
+                },
+                download: function () {
+                    window.open(this.server.link, "_blank");
                 }
-            });
-        </script>
-    </th:block>
+            },
+            created: function () {
+                this.refreshServer();
+            },
+            mounted: function () {
+                this.updateServerStatus();
+                const span = document.createElement("span");
+                span.setAttribute("calss", "sr-only");
+                document.getElementById("headerHome").appendChild(span);
+            },
+            destroyed() {
+                clearInterval(this.interval);
+            }
+        });
+        const suggestVue = new Vue({
+            el: "#suggestionBoard",
+            data: {
+                id: "",
+                subject: "",
+                content: "",
+                page: 1,
+                type: "suggestion",
+                count: 0,
+                lastPage: 0,
+                loginUserId : "",
+                list: [{
+                    content: "",
+                    userId: "",
+                    nickname: "",
+                    subject: "",
+                    formattedRegist: "",
+                    formattedUpdate: ""
+                }
+                ]
+
+            },
+            methods: {
+                getList: function (page) {
+                    const index = page - 1;
+                    axios.get('/board/' + this.type + '/' + index)
+                        .then(value => {
+                            this.list = value.data.list;
+                            this.page = value.data.page + 1;
+                            this.count = value.data.count;
+                            this.lastPage = Math.floor((this.count - 1) / 10) + 1;
+                        })
+                },
+                write: function () {
+                    if (this.subject.trim() === "") {
+                        alert("제목을 입력해주시길 바랍니다.");
+                        return;
+                    }
+                    if (this.content.length > 1000) {
+                        alert("내용이 너무 깁니다.");
+                        return;
+                    }
+                    axios.post('/board/' + this.type, {
+                        type: this.type,
+                        subject: this.subject,
+                        content: this.content
+                    }, {
+                        headers: {
+                            "X-CSRF-TOKEN": document.getElementById("csrf").value
+                        }
+                    })
+                        .then(value => {
+                            if (value.data === "success") {
+                                this.getList(this.page);
+                                document.getElementById("suggestionBoardWriteButton").click();
+                                this.subject = "";
+                                this.content = "";
+                            } else {
+                                alert("에러가 발생하였습니다.");
+                            }
+                        });
+                },
+                deleteBoard: function (id) {
+                    axios.delete('/board/' + id, {
+                        headers: {
+                            "X-CSRF-TOKEN": document.getElementById("csrf").value
+                        }
+                    })
+                        .then(value => {
+                            alert(value.data);
+                            this.getList(this.page);
+                        }).catch(reason => {
+                            console.log(reason)
+                        }
+                    );
+                }
+            }
+            ,
+            mounted: function () {
+                this.getList(1);
+                this.loginUserId = document.getElementById("loginUserId").value;
+            }
+        });
+    </script>
+</th:block>
 </body>
 </html>
