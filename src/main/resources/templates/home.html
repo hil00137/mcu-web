@@ -183,9 +183,6 @@
             },
             mounted: function () {
                 this.updateServerStatus();
-                const span = document.createElement("span");
-                span.setAttribute("calss", "sr-only");
-                document.getElementById("headerHome").appendChild(span);
             },
             destroyed() {
                 clearInterval(this.interval);
