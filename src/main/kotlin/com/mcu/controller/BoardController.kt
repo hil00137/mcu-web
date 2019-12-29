@@ -2,10 +2,13 @@ package com.mcu.controller
 
 import com.mcu.model.Board
 import com.mcu.model.BoardType
+import com.mcu.model.History
 import com.mcu.service.BoardService
+import com.mcu.service.HistoryService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.lang.IllegalArgumentException
@@ -18,6 +21,9 @@ class BoardController {
 
     @Autowired
     lateinit var boardService: BoardService
+
+    @Autowired
+    lateinit var historyService : HistoryService
 
     /**
      * 정해진 게시판의 page별로 게시글들을 가져옴. Caching
@@ -60,5 +66,26 @@ class BoardController {
         board.userId = userId
         boardService.saveBoard(boardType, board)
         return "success"
+    }
+
+    /**
+     * 게시글 삭제기능
+     */
+    @DeleteMapping("/{id}")
+    fun deleteBoard(@PathVariable id : String?) : String {
+        if(id == null || "" == id) {
+            return "잘못된 입력값입니다."
+        }
+        val board = boardService.getBoardById(id) ?: return "잘못된 입력값입니다."
+        val requestId = SecurityContextHolder.getContext().authentication.principal as String
+        return if (board.userId ==  requestId ||
+                SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            boardService.deleteBoard(board)
+            historyService.writeHistory("delete board id : $id from $requestId", History.USER_REQUEST)
+            "삭제하였습니다."
+        } else {
+            historyService.writeHistory("Access is not allowed.[delete board] from $requestId", History.RULE_OVER)
+            "권한이 없습니다."
+        }
     }
 }

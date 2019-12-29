@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CacheEvict
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class BoardService {
@@ -30,13 +31,13 @@ class BoardService {
     /**
      * 해당 게시판의 게시글 개수
      */
-    fun getCountOfBoard(type : BoardType) = boardRepository.countByType(type.type)
+    fun getCountOfBoard(type : BoardType) = boardRepository.countByTypeAndDelete(type.type, false)
 
     /**
      * 해당 게시판의 해당 페이지 게시글
      */
     fun getBoards(type : BoardType, page : Int): List<Board> {
-        val list = boardRepository.findAllByType(type.type, PageRequest.of(page, 10, Sort.by("id").descending()))
+        val list = boardRepository.findAllByTypeAndDelete(type.type, false, PageRequest.of(page, 10, Sort.by("id").descending()))
         list.forEach {
             it.userId.let { userId -> it.nickname = userService.getUserById(userId)?.nickname?:"" }
             it.regist?.let { regist -> it.formattedRegist = DateUtil.transform(regist)  }
@@ -61,8 +62,29 @@ class BoardService {
         if (StringUtil.isScriptInjection(board.content)) {
             logger.warn("Script Injection occurred by ${board.userId}")
             board.content = StringUtil.removeLabel(board.content)
-            historyService.writeHistory("Script Injection", History.RULE_OVER)
         }
         return boardRepository.save(board)
+    }
+
+    /**
+     * id로 검색하기
+     */
+    fun getBoardById(id: String) : Board? {
+        val result = boardRepository.findById(id)
+        return if(result.isPresent) {
+            result.get()
+        } else {
+            null
+        }
+    }
+
+    /**
+     * 삭제처리 (삭제는 flag를 바꿔 기록을 남겨둔다.)
+     */
+    @CacheEvict(value = ["boardCache"], allEntries = true)
+    fun deleteBoard(board: Board) {
+        board.delete = true
+        board.deleteDate = LocalDateTime.now()
+        boardRepository.save(board)
     }
 }
