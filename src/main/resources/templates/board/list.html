@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="~{layout/afterLogin.html}" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="container" id="boardList" style="border-color: #dddddd; border-style: solid; border-width: thin; padding: 10px; margin-bottom: 20px">
+        <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <ul class="nav nav-pills">
+            <input type="hidden" id="initBoardType" th:value="${boardType}"/>
+            <input type="hidden" id="boardType" v-model="type"/>
+            <li role="presentation" id="type_notification" @click="typeChange(event)"><a href="#" value="notification">공지사항</a></li>
+            <li role="presentation" id="type_suggestion" @click="typeChange(event)"><a href="#" value="suggestion">건의 게시판</a></li>
+        </ul>
+        <div class="panel panel-default" id="suggestionBoard" style="margin-top: 10px; margin-bottom: 10px;">
+            <!-- Table -->
+            <table class="table table-bordered table-hover">
+                <colgroup>
+                    <col span="1" style="width: 40%">
+                    <col span="1" style="width: 15%">
+                    <col span="1" style="width: 15%">
+                    <col sec:authorize="hasRole('ROLE_ADMIN')" span="1" style="width: 10%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th class="text-center">제목</th>
+                    <th class="text-center">닉네임</th>
+                    <th class="text-center">등록일자</th>
+                    <th sec:authorize="hasRole('ROLE_ADMIN')" class="text-center">운영자삭제</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="row in list">
+                    <th class="text-center"><a href="#" @click="detailBoard(row.id)">{{row.subject}}</a></th>
+                    <th class="text-center">{{row.nickname}}</th>
+                    <th class="text-center">{{row.formattedRegist}}</th>
+                    <th sec:authorize="hasRole('ROLE_ADMIN')"  class="text-center">
+                        <a href="#" @click="deleteBoard(row.id)">삭제</a>
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+            <div class="panel-footer">
+                <div class="text-center">
+                    <ul class="pagination" style="margin:0">
+                        <li v-bind:class="{ 'disabled':page === 1 }">
+                            <a href="#" aria-label="Previous" @click="getList(1)">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li><a href="#" v-if="page-2 > 0" @click="getList(page-2)">{{page-2}}</a></li>
+                        <li><a href="#" v-if="page-1 > 0" @click="getList(page-1)">{{page-1}}</a></li>
+                        <li class="active"><a href="#" @click="getList(page)">{{page}} <span
+                                class="sr-only">(current)</span></a></li>
+                        <li><a href="#" v-if="page*10 < count" @click="getList(page+1)">{{page+1}}</a></li>
+                        <li><a href="#" v-if="(page+1)*10 < count" @click="getList(page+2)">{{page+2}}</a></li>
+                        <li v-bind:class="{'disabled':page === lastPage}">
+                            <a href="#" aria-label="Next" @click="getList(lastPage)">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <button style="float: right; margin-top: 10px;" class="btn btn-default" onclick="location.href='/board/write'" >
+                글쓰기
+            </button>
+        </div>
+    </div>
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript">
+        const boardList = new Vue({
+            el: "#boardList",
+            data: {
+                id: "",
+                subject: "",
+                content: "",
+                page: 1,
+                type: "",
+                count: 0,
+                lastPage: 0,
+                list: [{
+                    content: "",
+                    userId: "",
+                    nickname: "",
+                    subject: "",
+                    formattedRegist: "",
+                    formattedUpdate: ""
+                }
+                ]
+
+            },
+            methods: {
+                getList: function (page) {
+                    const index = page - 1;
+                    axios.get('/board/' + this.type + '/' + index)
+                        .then(value => {
+                            this.list = value.data.list;
+                            this.page = value.data.page + 1;
+                            this.count = value.data.count;
+                            this.lastPage = Math.floor((this.count - 1) / 10) + 1;
+                        })
+                },
+                deleteBoard: function (id) {
+                    axios.delete('/board/' + id, {
+                        headers: {
+                            "X-CSRF-TOKEN": document.getElementById("csrf").value
+                        }
+                    })
+                        .then(value => {
+                            alert(value.data);
+                            this.getList(this.page);
+                        }).catch(reason => {
+                            console.log(reason)
+                        }
+                    );
+                },
+                detailBoard: function (id) {
+                    location.href= "/board/detail/"+id;
+                },
+                typeChange: function (event) {
+                    document.getElementById("type_"+this.type).classList.remove("active");
+                    this.type = event.target.getAttribute("value");
+                    document.getElementById("type_"+this.type).classList.add("active");
+                    this.getList(1);
+                }
+            }
+            ,
+            mounted: function () {
+                const element = document.getElementById("initBoardType");
+                this.type = element.value;
+                element.remove();
+                document.getElementById("type_"+this.type).classList.add("active");
+
+                this.getList(1);
+            }
+        });
+
+
+    </script>
+</th:block>
+</body>
+</html>
