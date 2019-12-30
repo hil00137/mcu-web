@@ -1,11 +1,13 @@
 package com.mcu.controller
 
+import com.mcu.model.BoardType
 import com.mcu.service.BoardService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.servlet.ModelAndView
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 class WebCommonController {
@@ -34,5 +36,11 @@ class WebCommonController {
     @GetMapping("/board/write")
     fun goWrite(): String {
         return "board/write"
+    }
+
+    @GetMapping("/board")
+    fun goBoardList(request : HttpServletRequest): ModelAndView {
+        val boardType = request.getParameter("boardType")
+        return ModelAndView("board/list").addObject("boardType",boardType?:BoardType.NOTIFICATION.type)
     }
 }

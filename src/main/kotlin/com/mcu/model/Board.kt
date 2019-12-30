@@ -26,5 +26,6 @@ class Board : Serializable {
  * 게시판 구분
  */
 enum class BoardType(val type: String) {
-    SUGGESTION("suggestion")
+    SUGGESTION("suggestion"),
+    NOTIFICATION("notification")
 }

@@ -12,15 +12,24 @@ const headerVue = new Vue({
         },
         goGuide: function () {
             location.href = "/guide";
+        },
+        goBoard: function () {
+            location.href = "/board";
         }
     },
     mounted: function () {
+        const headerList = ["home","guide","board"];
         const url = window.location.href;
         const index = url.lastIndexOf("/");
         const current = url.substring(index + 1);
         try {
-            const nav = document.getElementById(current + "Header").parentElement;
-            nav.classList.add("active");
+            for(let i=0; i<headerList.length; i++) {
+                if(url.match(headerList[i])) {
+                    const nav = document.getElementById(headerList[i] + "Header").parentElement;
+                    nav.classList.add("active");
+                    break;
+                }
+            }
         } catch (e) {
 
         }

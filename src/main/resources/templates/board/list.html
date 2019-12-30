@@ -7,62 +7,15 @@
 </head>
 <body>
 <th:block layout:fragment="content">
-    <!--
-            서버 상태 패널
-        -->
-    <div class="container">
-        <div class="panel panel-info" id="serverPanel">
-            <div class="panel-heading" style="padding-bottom:0px; padding-right:10px"><h1>서버 상태</h1>
-                <p class="text-right" style="margin-bottom:2px; font-size:10pt">서버에 사람이 없을 경우 3분뒤 종료됩니다</p>
-            </div>
-            <table class="table table-bordered table-hover">
-                <colgroup>
-                    <col span="1" style="width: 10%">
-                    <col span="1" style="width: 10%">
-                    <col span="1" style="width: 10%">
-                    <col span="1" style="width: 10%">
-                    <col span="1" style="width: 10%">
-                    <col span="1" style="width: 10%">
-                </colgroup>
-                <thead>
-                <tr>
-                    <th class="text-center">서버이름</th>
-                    <th class="text-center">모드팩</th>
-                    <th class="text-center">서버IP</th>
-                    <th class="text-center">online</th>
-                    <th class="text-center">접속인원</th>
-                    <th class="text-center">서버On</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th class="text-center">{{server.name}}</th>
-                    <th class="text-center"><a href="#" @click="download">link</a></th>
-                    <th class="text-center">{{server.ip}}</th>
-                    <th class="text-center" :class="serverOnline">{{server.online}}</th>
-                    <th class="text-center">{{server.user}}</th>
-                    <th class="text-center">
-                        <button v-if="server.ip === 'null'" type="button" class="btn btn-success"
-                                @click="serverStart(server.name, $event)">서버구동
-                        </button>
-                    </th>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="container">
+    <div class="container" id="boardList" style="border-color: #dddddd; border-style: solid; border-width: thin; padding: 10px; margin-bottom: 20px">
         <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <div class="panel panel-default" id="suggestionBoard">
-            <!-- Default panel contents -->
-            <div class="panel-heading">
-                <div>
-                    <button style="float: right;" class="btn btn-default" onclick="location.href='/board/write'" >
-                        글쓰기
-                    </button>
-                    <h3>공지사항</h3>
-                </div>
-            </div>
+        <ul class="nav nav-pills">
+            <input type="hidden" id="initBoardType" th:value="${boardType}"/>
+            <input type="hidden" id="boardType" v-model="type"/>
+            <li role="presentation" id="type_notification" @click="typeChange(event)"><a href="#" value="notification">공지사항</a></li>
+            <li role="presentation" id="type_suggestion" @click="typeChange(event)"><a href="#" value="suggestion">건의 게시판</a></li>
+        </ul>
+        <div class="panel panel-default" id="suggestionBoard" style="margin-top: 10px; margin-bottom: 10px;">
             <!-- Table -->
             <table class="table table-bordered table-hover">
                 <colgroup>
@@ -112,69 +65,22 @@
                     </ul>
                 </div>
             </div>
+            <button style="float: right; margin-top: 10px;" class="btn btn-default" onclick="location.href='/board/write'" >
+                글쓰기
+            </button>
         </div>
     </div>
 </th:block>
 <th:block layout:fragment="script">
-    <script>
-        const serverVue = new Vue({
-            el: "#serverPanel",
-            data: {
-                server: {
-                    name: '',
-                    ip: '',
-                    online: 'off',
-                    user: '',
-                    link: ''
-                },
-                serverOnline: ''
-            },
-            methods: {
-                updateServerStatus: function () {
-                    this.interval = setInterval(function () {
-                        this.refreshServer();
-                    }.bind(this), 5000);
-                },
-                refreshServer: function () {
-                    axios.get('/server/status/mcu_server_01')
-                        .then(value => {
-                            this.server = value.data;
-                            if (this.server.online === 'on') {
-                                this.serverOnline = 'success';
-                            } else {
-                                this.serverOnline = '';
-                            }
-                        });
-                },
-                serverStart: function (serverName, event) {
-                    event.target.disabled = true;
-                    axios.get('/server/start/' + serverName)
-                        .then(value => {
-                            // console.log(value.data);
-                        });
-                },
-                download: function () {
-                    window.open(this.server.link, "_blank");
-                }
-            },
-            created: function () {
-                this.refreshServer();
-            },
-            mounted: function () {
-                this.updateServerStatus();
-            },
-            destroyed() {
-                clearInterval(this.interval);
-            }
-        });
-        const suggestVue = new Vue({
-            el: "#suggestionBoard",
+    <script type="text/javascript">
+        const boardList = new Vue({
+            el: "#boardList",
             data: {
                 id: "",
                 subject: "",
                 content: "",
                 page: 1,
-                type: "notification",
+                type: "",
                 count: 0,
                 lastPage: 0,
                 list: [{
@@ -215,13 +121,26 @@
                 },
                 detailBoard: function (id) {
                     location.href= "/board/detail/"+id;
+                },
+                typeChange: function (event) {
+                    document.getElementById("type_"+this.type).classList.remove("active");
+                    this.type = event.target.getAttribute("value");
+                    document.getElementById("type_"+this.type).classList.add("active");
+                    this.getList(1);
                 }
             }
             ,
             mounted: function () {
+                const element = document.getElementById("initBoardType");
+                this.type = element.value;
+                element.remove();
+                document.getElementById("type_"+this.type).classList.add("active");
+
                 this.getList(1);
             }
         });
+
+
     </script>
 </th:block>
 </body>
