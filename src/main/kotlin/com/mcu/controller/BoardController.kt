@@ -54,18 +54,25 @@ class BoardController {
      * 게시글 등록
      */
     @PostMapping("/{type}")
-    fun saveBoard(@PathVariable type: String, @RequestBody board: Board?) : String {
+    fun saveBoard(@PathVariable type: String, @RequestBody board: Board?) : Map<String, Any> {
         val boardType: BoardType?
+        val result = HashMap<String, Any>()
         try {
             boardType = BoardType.valueOf(type.toUpperCase())
         } catch (e : IllegalArgumentException) {
-            return "존재하지 않는 게시판입니다."
+            result["message"] = "존재하지 않는 게시판입니다."
+            return result
         }
-        board?:return "잘못된 접근입니다."
+        if(board == null) {
+            result["message"]="잘못된 접근입니다."
+            return result;
+        }
         val userId = SecurityContextHolder.getContext().authentication.principal as String
         board.userId = userId
-        boardService.saveBoard(boardType, board)
-        return "success"
+        val boardId = boardService.saveBoard(boardType, board).id
+        result["message"] = "success"
+        result["boardId"] = boardId
+        return result
     }
 
     /**
@@ -73,12 +80,12 @@ class BoardController {
      */
     @DeleteMapping("/{id}")
     fun deleteBoard(@PathVariable id : String?) : String {
-        if(id == null || "" == id) {
+        if (id == null || "" == id) {
             return "잘못된 입력값입니다."
         }
         val board = boardService.getBoardById(id) ?: return "잘못된 입력값입니다."
         val requestId = SecurityContextHolder.getContext().authentication.principal as String
-        return if (board.userId ==  requestId ||
+        return if (board.userId == requestId ||
                 SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
             boardService.deleteBoard(board)
             historyService.writeHistory("delete board id : $id from $requestId", History.USER_REQUEST)
