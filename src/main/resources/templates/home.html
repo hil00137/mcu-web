@@ -57,39 +57,24 @@
             <!-- Default panel contents -->
             <div class="panel-heading">
                 <div>
-                    <button id="suggestionBoardWriteButton" style="float: right;" class="btn btn-default"
-                            data-toggle="collapse" data-target="#suggestionSubmit">
+                    <button style="float: right;" class="btn btn-default" onclick="location.href='/board/write'" >
                         글쓰기
                     </button>
                     <h3>건의 게시판</h3>
                 </div>
             </div>
-            <div class="panel-body collapse" id="suggestionSubmit">
-                <form class="form-group">
-                    <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <label for="subject">제목</label>
-                    <input type="text" class="form-control" v-model="subject" id="subject" maxlength="50">
-                    <br>
-                    <label for="content">내용</label>
-                    <textarea class="form-control" rows="20" v-model="content" id="content"></textarea>
-                    <button style="float: right; margin: 10px" class="btn btn-primary" type="button" @click="write"
-                            value="">작성
-                    </button>
-                </form>
-            </div>
             <!-- Table -->
             <table class="table table-bordered table-hover">
                 <colgroup>
-                    <col span="1" style="width: 20%">
-                    <col span="1" style="width: 50%">
+                    <col span="1" style="width: 40%">
+                    <col span="1" style="width: 15%">
+                    <col span="1" style="width: 15%">
                     <col span="1" style="width: 10%">
-                    <col span="1" style="width: 10%">
-                    <col span="1" style="width: 10%">
+                    <col sec:authorize="hasRole('ROLE_ADMIN')" span="1" style="width: 10%">
                 </colgroup>
                 <thead>
                 <tr>
                     <th class="text-center">제목</th>
-                    <th class="text-center">내용</th>
                     <th class="text-center">닉네임</th>
                     <th class="text-center">등록일자</th>
                     <th class="text-center">글삭제</th>
@@ -98,15 +83,14 @@
                 </thead>
                 <tbody>
                 <tr v-for="row in list">
-                    <th class="text-center">{{row.subject}}</th>
-                    <th>{{row.content}}</th>
+                    <th class="text-center"><a href="#" @click="detailBoard(row.id)">{{row.subject}}</a></th>
                     <th class="text-center">{{row.nickname}}</th>
                     <th class="text-center">{{row.formattedRegist}}</th>
                     <th class="text-center">
-                        <a href="#" v-if="row.userId == loginUserId" type="button" @click="deleteBoard(row.id)">삭제</a>
+                        <a href="#" v-if="row.userId == loginUserId" @click="deleteBoard(row.id)">삭제</a>
                     </th>
                     <th sec:authorize="hasRole('ROLE_ADMIN')"  class="text-center">
-                        <a href="#" class="btn btn-primary" type="button" @click="deleteBoard(row.id)">삭제</a>
+                        <a href="#" @click="deleteBoard(row.id)">삭제</a>
                     </th>
                 </tr>
                 </tbody>
@@ -221,35 +205,6 @@
                             this.lastPage = Math.floor((this.count - 1) / 10) + 1;
                         })
                 },
-                write: function () {
-                    if (this.subject.trim() === "") {
-                        alert("제목을 입력해주시길 바랍니다.");
-                        return;
-                    }
-                    if (this.content.length > 1000) {
-                        alert("내용이 너무 깁니다.");
-                        return;
-                    }
-                    axios.post('/board/' + this.type, {
-                        type: this.type,
-                        subject: this.subject,
-                        content: this.content
-                    }, {
-                        headers: {
-                            "X-CSRF-TOKEN": document.getElementById("csrf").value
-                        }
-                    })
-                        .then(value => {
-                            if (value.data === "success") {
-                                this.getList(this.page);
-                                document.getElementById("suggestionBoardWriteButton").click();
-                                this.subject = "";
-                                this.content = "";
-                            } else {
-                                alert("에러가 발생하였습니다.");
-                            }
-                        });
-                },
                 deleteBoard: function (id) {
                     axios.delete('/board/' + id, {
                         headers: {
@@ -263,6 +218,9 @@
                             console.log(reason)
                         }
                     );
+                },
+                detailBoard: function (id) {
+                    location.href= "/board/detail/"+id;
                 }
             }
             ,

@@ -18,7 +18,11 @@ const headerVue = new Vue({
         const url = window.location.href;
         const index = url.lastIndexOf("/");
         const current = url.substring(index + 1);
-        const nav = document.getElementById(current + "Header").parentElement;
-        nav.classList.add("active");
+        try {
+            const nav = document.getElementById(current + "Header").parentElement;
+            nav.classList.add("active");
+        } catch (e) {
+
+        }
     }
 });

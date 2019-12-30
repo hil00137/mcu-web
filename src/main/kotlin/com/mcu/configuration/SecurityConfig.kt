@@ -55,6 +55,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .csrf()
                 .and()
                 .authenticationProvider(authProvider)
+        // iFrame 에서 lib 를 사용못하는 문제
+        http.headers().frameOptions().sameOrigin()
     }
 
 }

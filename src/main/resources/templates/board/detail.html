@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="~{layout/afterLogin.html}" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="container" id="main-area" style="border-color: #dddddd; border-style: solid; border-width: thin; padding: 10px; margin-bottom: 20px">
+        <ul class="nav nav-pills">
+            <input type="hidden" id="boardType" th:value="${board.getType()}"/>
+            <li role="presentation" id="type_suggestion"><a href="#">건의 게시판</a></li>
+        </ul>
+        <div class="page-header" id="board-subject">
+            <h1 th:text="${board.getSubject()}"></h1>
+        </div>
+        <div class="page-item" id="board-content" th:text="${board.getContent()}">
+        </div>
+    </div>
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript">
+        const boardContent = document.getElementById('board-content');
+        let text = boardContent.innerText;
+        boardContent.innerHTML = text;
+
+        const boardType = document.getElementById('boardType').value;
+        document.getElementById("type_"+boardType).classList.add("active");
+    </script>
+</th:block>
+</body>
+</html>
