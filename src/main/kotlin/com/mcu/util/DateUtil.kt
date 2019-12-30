@@ -14,7 +14,7 @@ class DateUtil {
             if(dateTime.toLocalDate().isEqual(today)) {
                 return dateTime.toLocalTime().format(DateTimeFormatter.ofPattern("HH시 mm분"))
             }
-            return dateTime.toLocalDate().format(DateTimeFormatter.ofPattern("YY.MM.dd"))
+            return dateTime.toLocalDate().format(DateTimeFormatter.ofPattern("yy.MM.dd"))
         }
     }
 }
