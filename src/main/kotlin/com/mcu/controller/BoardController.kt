@@ -63,11 +63,17 @@ class BoardController {
             result["message"] = "존재하지 않는 게시판입니다."
             return result
         }
+        val userId = SecurityContextHolder.getContext().authentication.principal as String
         if(board == null) {
             result["message"]="잘못된 접근입니다."
             return result;
+        } else if (boardType == BoardType.NOTIFICATION) {
+            if(!SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
+                result["message"]="잘못된 접근입니다."
+                historyService.writeHistory("Access is not allowed.[save board] from $userId", History.RULE_OVER)
+                return result;
+            }
         }
-        val userId = SecurityContextHolder.getContext().authentication.principal as String
         board.userId = userId
         val boardId = boardService.saveBoard(boardType, board).id
         result["message"] = "success"
