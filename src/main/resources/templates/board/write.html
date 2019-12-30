@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="~{layout/afterLogin.html}" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="container" style="border-color: #dddddd; border-style: solid; border-width: thin; padding: 10px; margin-bottom: 20px">
+        <form id="boardWriteForm" class="form-group" method="post">
+            <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="col-md-12" style="margin-bottom: 10px;">
+                <label for="typeDropdown">게시판</label>
+                <div class="btn-group col-md-12" style="padding-left: 0px;">
+                    <button id="typeDropdown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        {{typeName}}
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a @click="selectType($event)" href="#" value="suggestion">건의 게시판</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <label for="subject">제목</label>
+                <input type="text" class="form-control" v-model="subject" id="subject" maxlength="50">
+            </div>
+            <div class="col-md-12">
+                <br>
+                <label for="content">내용</label>
+                <textarea rows="30" cols="30" v-model="content" style="width: 100%" id="content" name="content"></textarea>
+                <button style="float: right; margin: 10px" class="btn btn-primary" type="button" @click="write"
+                        value="">작성
+                </button>
+            </div>
+        </form>
+    </div>
+</th:block>
+<th:block layout:fragment="script">
+    <script type="application/javascript" th:src="@{/plugin/se2/js/service/HuskyEZCreator.js}" charset="UTF-8"></script>
+    <script type="text/javascript">
+        const writeVue = new Vue({
+            el: "#boardWriteForm",
+            data: {
+                subject: "",
+                content: "",
+                typeName: "게시판 선택",
+                type: ""
+            },
+            methods: {
+                write: function () {
+                    oEditors.getById["content"].exec("UPDATE_CONTENTS_FIELD", []);
+                    this.content = document.getElementById("content").value;
+
+                    if (this.subject.trim() === "") {
+                        alert("제목을 입력해주시길 바랍니다.");
+                        return;
+                    }
+                    if (this.content.length > 3000) {
+                        alert("내용이 너무 깁니다.");
+                        return;
+                    }
+
+                    if (this.type === "") {
+                        alert("게시판을 선택해주세요.");
+                        return;
+                    }
+
+                    axios.post('/board/' + this.type, {
+                        type: this.type,
+                        subject: this.subject,
+                        content: this.content
+                    }, {
+                        headers: {
+                            "X-CSRF-TOKEN": document.getElementById("csrf").value
+                        }
+                    })
+                        .then(value => {
+                            if (value.data.message === "success") {
+                                alert("성공하였습니다.");
+                                location.href = "/board/detail/" + value.data.boardId;
+                            } else {
+                                alert(value.data.message);
+                            }
+                        });
+                },
+                selectType : function (event) {
+                    const type = event.target.getAttribute("value");
+                    const typeName = event.target.text;
+                    this.type = type;
+                    document.getElementById("boardWriteForm").setAttribute("action","/board/"+type);
+                    this.typeName = typeName;
+                }
+            }
+        });
+
+        const oEditors = [];
+        nhn.husky.EZCreator.createInIFrame({
+            oAppRef: oEditors,
+            elPlaceHolder: "content",
+            sSkinURI: "/plugin/se2/SmartEditor2Skin.html",
+            fCreator: "createSEditor2"
+        });
+    </script>
+</th:block>
+</body>
+</html>
