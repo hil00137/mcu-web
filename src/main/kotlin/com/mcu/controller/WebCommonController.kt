@@ -3,6 +3,7 @@ package com.mcu.controller
 import com.mcu.model.BoardType
 import com.mcu.service.BoardService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,11 +27,16 @@ class WebCommonController {
     }
 
     /**
-     * detail page
+     * board detail page
      */
     @GetMapping("/board/detail/{id}")
-    fun goDetail(@PathVariable id : String) : ModelAndView {
-        return ModelAndView("board/detail").addObject("board", boardService.getBoardById(id))
+    fun goBoardDetail(@PathVariable id : String) : ModelAndView {
+        var targetBoard = boardService.getBoardById(id)
+        if(targetBoard != null) {
+            val userId = SecurityContextHolder.getContext().authentication.principal as String
+            boardService.hitCount(targetBoard, userId)
+        }
+        return ModelAndView("board/detail").addObject("board", targetBoard)
     }
 
     @GetMapping("/board/write")
