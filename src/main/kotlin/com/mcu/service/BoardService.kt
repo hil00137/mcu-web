@@ -8,7 +8,7 @@ import com.mcu.util.DateUtil
 import com.mcu.util.StringUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -49,7 +49,6 @@ class BoardService {
     /**
      * 게시글 저장 캐시 삭제
      */
-    @CacheEvict(value = ["boardCache"], allEntries = true)
     fun saveBoard(type : BoardType, board: Board): Board {
         board.subject = StringUtil.checkScriptInjection(board.subject)
         if (StringUtil.isScriptInjection(board.subject)) {
@@ -81,10 +80,15 @@ class BoardService {
     /**
      * 삭제처리 (삭제는 flag를 바꿔 기록을 남겨둔다.)
      */
-    @CacheEvict(value = ["boardCache"], allEntries = true)
     fun deleteBoard(board: Board) {
         board.delete = true
         board.deleteDate = LocalDateTime.now()
+        boardRepository.save(board)
+    }
+
+    @Cacheable(value = ["hitCache"], key = "#userId + ':' + #board.id")
+    fun hitCount(board: Board, userId : String) {
+        board.hit++
         boardRepository.save(board)
     }
 }
