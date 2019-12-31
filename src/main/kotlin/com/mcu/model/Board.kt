@@ -20,6 +20,7 @@ class Board : Serializable {
     var formattedUpdate : String? = null                // 정해진 양식의 수정일자 : 웹 출력용
     var delete : Boolean = false                        // 삭제 여부
     var deleteDate : LocalDateTime? = null
+    var hit : Int = 0                                   // 조회수
 }
 
 /**

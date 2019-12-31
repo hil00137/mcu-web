@@ -16,6 +16,7 @@
         </ul>
         <div class="page-header" id="board-subject">
             <h1 th:text="${board.getSubject()}"></h1>
+            <small th:text="'조회수 : ' + ${board.getHit()}"></small>
         </div>
         <div class="page-item" id="board-content" th:text="${board.getContent()}">
         </div>
