@@ -69,6 +69,7 @@
                     <col span="1" style="width: 40%">
                     <col span="1" style="width: 15%">
                     <col span="1" style="width: 15%">
+                    <col span="1" style="width: 5%">
                     <col sec:authorize="hasRole('ROLE_ADMIN')" span="1" style="width: 10%">
                 </colgroup>
                 <thead>
@@ -76,6 +77,7 @@
                     <th class="text-center">제목</th>
                     <th class="text-center">닉네임</th>
                     <th class="text-center">등록일자</th>
+                    <th class="text-center">조회수</th>
                     <th sec:authorize="hasRole('ROLE_ADMIN')" class="text-center">운영자삭제</th>
                 </tr>
                 </thead>
@@ -84,6 +86,7 @@
                     <th class="text-center"><a href="#" @click="detailBoard(row.id)">{{row.subject}}</a></th>
                     <th class="text-center">{{row.nickname}}</th>
                     <th class="text-center">{{row.formattedRegist}}</th>
+                    <th class="text-center">{{row.hit}}</th>
                     <th sec:authorize="hasRole('ROLE_ADMIN')"  class="text-center">
                         <a href="#" @click="deleteBoard(row.id)">삭제</a>
                     </th>
@@ -182,6 +185,7 @@
                     userId: "",
                     nickname: "",
                     subject: "",
+                    hit : "",
                     formattedRegist: "",
                     formattedUpdate: ""
                 }
