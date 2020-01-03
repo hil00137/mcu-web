@@ -1,29 +1,82 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="~{layout/afterLogin.html}" xmlns:v-on="http://www.w3.org/1999/xhtml"
-      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      layout:decorator="~{layout/afterLogin.html}"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 </head>
 <body>
 <th:block layout:fragment="content">
     <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <input type="hidden" id="boardId" th:value="${board.id}">
     <div class="container" id="main-area" style="border-color: #dddddd; border-style: solid; border-width: thin; padding: 10px; margin-bottom: 20px">
         <ul class="nav nav-pills">
             <input type="hidden" id="boardType" th:value="${board.getType()}"/>
             <li role="presentation" id="type_notification"><a href="#" value="notification" onclick="goBoardList(this)">공지사항</a></li>
             <li role="presentation" id="type_suggestion"><a href="#" value="suggestion" onclick="goBoardList(this)">건의 게시판</a></li>
         </ul>
-        <div class="page-header" id="board-subject">
+        <div class="page-header col-xs-12" id="board-subject">
             <h1 th:text="${board.getSubject()}"></h1>
             <small th:text="'조회수 : ' + ${board.getHit()}"></small>
         </div>
-        <div class="page-item" id="board-content" th:text="${board.getContent()}">
+        <div class="page-item col-xs-12" id="board-content" th:text="${board.getContent()}">
         </div>
-        <div th:if="${board.getUserId()} == ${#authentication.principal} or ${#authorization.expr('hasRole(''ROLE_ADMIN'')')}">
+        <div class="col-xs-12" th:if="${board.getUserId()} == ${#authentication.principal} or ${#authorization.expr('hasRole(''ROLE_ADMIN'')')}">
             <button style="float: right; margin-top: 10px;" class="btn btn-default" onclick="deleteBoard(this)" th:value="${board.id}" >
                 삭제
             </button>
+        </div>
+
+        <div class="col-xs-12" style="margin-top: 20px">
+            <ul class="media-list" id="commentVue">
+                <li class="media">
+                    <div class="media-body">
+                        <textarea v-model="commentInput" rows="3" placeholder="댓글을 입력해 주세요."
+                                  class="well well-sm" maxlength="6000" style="width: 100%; line-height: 14px; height: 60px;"></textarea>
+                    </div>
+                    <div class="media-right">
+                        <button class="btn btn-primary" @click="commentSave()">댓글<br>등록</button>
+                    </div>
+                </li>
+                <h4>댓글 : {{count}}</h4>
+                <li v-for="row in list" class="media" style="background-color: #f7f7f7; padding-left: 10px; padding-right: 10px; padding-top: 10px;">
+                    <div class="media-body">
+                        <h4 class="media-heading" style="margin-top: 10px;">{{row.nickname}}  <small>작성일 :  {{row.formattedRegist}}</small></h4>
+                        <p>{{row.content}}</p>
+                    </div>
+                    <div v-if="row.userId == loginUserId">
+                        <button style="float: right; margin-top: 10px;" class="btn btn-default" @click="deleteComment(row.id)">
+                            삭제
+                        </button>
+                    </div>
+                    <div sec:authorize="hasRole('ROLE_ADMIN')">
+                        <button style="float: right; margin-top: 10px;" class="btn btn-default" @click="deleteComment(row.id)">
+                            삭제
+                        </button>
+                    </div>
+                </li>
+                <div class="panel-footer" style="margin-top: 10px;">
+                    <div class="text-center">
+                        <ul class="pagination" style="margin:0">
+                            <li v-bind:class="{ 'disabled':page === 1 }">
+                                <a href="#" aria-label="Previous" @click="getList(1)">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li><a href="#" v-if="page-2 > 0" @click="getList(page-2)">{{page-2}}</a></li>
+                            <li><a href="#" v-if="page-1 > 0" @click="getList(page-1)">{{page-1}}</a></li>
+                            <li class="active"><a href="#" @click="getList(page)">{{page}} <span
+                                    class="sr-only">(current)</span></a></li>
+                            <li><a href="#" v-if="page*5 < count" @click="getList(page+1)">{{page+1}}</a></li>
+                            <li><a href="#" v-if="(page+1)*5 < count" @click="getList(page+2)">{{page+2}}</a></li>
+                            <li v-bind:class="{'disabled':page === lastPage}">
+                                <a href="#" aria-label="Next" @click="getList(lastPage)">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </ul>
         </div>
     </div>
 </th:block>
@@ -58,6 +111,90 @@
                 );
             }
         }
+
+        const commentVue = new Vue({
+            el: "#commentVue",
+            data : {
+                boardId: "",
+                commentInput: "",
+                page: 1,
+                count: 0,
+                lastPage: 0,
+                loginUserId: "",
+                list: [{
+                    id: "",
+                    content: "",
+                    userId: "",
+                    nickname: "",
+                    subject: "",
+                    formattedRegist: ""
+                }]
+            },
+            methods : {
+                getList: function (page) {
+                    const index = page - 1;
+                    axios.get('/comment/' + this.boardId + '/' + index)
+                        .then(value => {
+                            this.list = value.data.list;
+                            this.page = value.data.page + 1;
+                            this.count = value.data.count;
+                            this.lastPage = Math.floor((this.count - 1) / 5) + 1;
+                        })
+                },
+                commentSave: function () {
+                    const content = this.commentInput;
+                    if(content.trim() === "") {
+                        alert("내용을 입력해주세요.");
+                        return;
+                    }
+
+                    axios.post('/comment',{
+                        boardId: this.boardId,
+                        content: content
+                    } , {
+                        headers: {
+                            "X-CSRF-TOKEN": document.getElementById("csrf").value
+                        }
+                    })
+                        .then(value => {
+                            if(value.data === "success"){
+                                this.commentInput = "";
+                                this.getList(this.page)
+                            }
+                        }).catch(reason => {
+                            console.log(reason)
+                        }
+                    );
+                },
+                deleteComment: function (id) {
+                    if(confirm("댓글을 삭제하시겠습니까?")){
+                        axios.delete('/comment',{
+                            data: {
+                                commentId : id
+                            },
+                            headers: {
+                                "X-CSRF-TOKEN": document.getElementById("csrf").value
+                            }
+                        })
+                            .then(value => {
+                                if(value.data === "success"){
+                                    this.getList(this.page);
+                                } else {
+                                    alert(value.data);
+                                }
+                            }).catch(reason => {
+                                console.log(reason)
+                            }
+                        );
+                    }
+                }
+            },
+            mounted : function () {
+                this.boardId = document.getElementById("boardId").value;
+                this.loginUserId = document.getElementById("loginUserId").value;
+                this.getList(1);
+            }
+        });
     </script>
 </th:block>
 </body>

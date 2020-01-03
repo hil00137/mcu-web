@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="~{layout/afterLogin.html}" xmlns:v-on="http://www.w3.org/1999/xhtml"
-      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      layout:decorator="~{layout/afterLogin.html}"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 </head>
@@ -83,7 +83,7 @@
                 </thead>
                 <tbody>
                 <tr v-for="row in list">
-                    <th class="text-center"><a href="#" @click="detailBoard(row.id)">{{row.subject}}</a></th>
+                    <th class="text-center"><a href="#" @click="detailBoard(row.id)">{{row.subject}}</a> ({{row.commentCount}})</th>
                     <th class="text-center">{{row.nickname}}</th>
                     <th class="text-center">{{row.formattedRegist}}</th>
                     <th class="text-center">{{row.hit}}</th>
@@ -178,6 +178,7 @@
                 content: "",
                 page: 1,
                 type: "notification",
+                commentCount : 0,
                 count: 0,
                 lastPage: 0,
                 list: [{

@@ -91,4 +91,12 @@ class BoardService {
         board.hit++
         boardRepository.save(board)
     }
+
+    /**
+     * comment 숫자 늘리기
+     */
+    fun commentCount(board: Board, num: Int) {
+        board.commentCount += num
+        boardRepository.save(board)
+    }
 }
