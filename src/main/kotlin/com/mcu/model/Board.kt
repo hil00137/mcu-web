@@ -21,6 +21,7 @@ class Board : Serializable {
     var delete : Boolean = false                        // 삭제 여부
     var deleteDate : LocalDateTime? = null
     var hit : Int = 0                                   // 조회수
+    var commentCount : Int = 0
 }
 
 /**
