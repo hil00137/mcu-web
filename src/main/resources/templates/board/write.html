@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="~{layout/afterLogin.html}" xmlns:v-on="http://www.w3.org/1999/xhtml"
-      xmlns:v-for="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      layout:decorator="~{layout/afterLogin.html}"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 </head>
@@ -10,6 +9,11 @@
     <div class="container" style="border-color: #dddddd; border-style: solid; border-width: thin; padding: 10px; margin-bottom: 20px">
         <form id="boardWriteForm" class="form-group" method="post">
             <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" th:if="${board != null}" id="boardId" th:value="${board.id}">
+            <input type="hidden" th:if="${board != null}" id="boardType" th:value="${board.type}">
+            <input type="hidden" th:if="${board != null}" id="boardSubject" th:value="${board.subject}">
+            <input type="hidden" th:if="${board != null}" id="boardContent" th:value="${board.content}">
+            <input type="hidden" id="message" th:value="${message}">
             <div class="col-md-12" style="margin-bottom: 10px;">
                 <label for="typeDropdown">게시판</label>
                 <div class="btn-group col-md-12" style="padding-left: 0px;">
@@ -17,8 +21,8 @@
                         {{typeName}}
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a @click="selectType($event)" href="#" value="suggestion">건의 게시판</a></li>
-                        <li sec:authorize="hasRole('ROLE_ADMIN')"><a @click="selectType($event)" href="#" value="notification">공지사항</a></li>
+                        <li><a @click="selectType($event)" href="#" id="type_suggestion" value="suggestion">건의 게시판</a></li>
+                        <li sec:authorize="hasRole('ROLE_ADMIN')"><a @click="selectType($event)" href="#" id="type_notification" value="notification">공지사항</a></li>
                     </ul>
                 </div>
             </div>
@@ -30,8 +34,11 @@
                 <br>
                 <label for="content">내용</label>
                 <textarea rows="30" cols="30" v-model="content" style="width: 100%" id="content" name="content"></textarea>
-                <button style="float: right; margin: 10px" class="btn btn-primary" type="button" @click="write"
+                <button v-if="boardId == ''" style="float: right; margin: 10px" class="btn btn-primary" type="button" @click="write"
                         value="">작성
+                </button>
+                <button v-if="boardId != ''" style="float: right; margin: 10px" class="btn btn-primary" type="button" @click="modify"
+                        value="">수정
                 </button>
             </div>
         </form>
@@ -45,6 +52,7 @@
             data: {
                 subject: "",
                 content: "",
+                boardId: "",
                 typeName: "게시판 선택",
                 type: ""
             },
@@ -78,12 +86,42 @@
                     })
                         .then(value => {
                             if (value.data.message === "success") {
-                                alert("성공하였습니다.");
                                 location.href = "/board/detail/" + value.data.boardId;
                             } else {
                                 alert(value.data.message);
                             }
                         });
+                },
+                modify: function() {
+                    oEditors.getById["content"].exec("UPDATE_CONTENTS_FIELD", []);
+                    this.content = document.getElementById("content").value;
+
+                    if (this.subject.trim() === "") {
+                        alert("제목을 입력해주시길 바랍니다.");
+                        return;
+                    }
+                    if (this.content.byteLength > 10*1024*1024) {
+                        alert("내용이 너무 깁니다.");
+                        return;
+                    }
+
+                    axios.put('/board/write',{
+                            id: this.boardId,
+                            subject: this.subject,
+                            content: this.content
+                        },{
+                            headers: {
+                                "X-CSRF-TOKEN": document.getElementById("csrf").value
+                            }
+                        }
+                    )
+                    .then(value => {
+                        if(value.data != "success") {
+                            alert(value.data);
+                        } else {
+                            location.href = "/board/detail/"+ this.boardId;
+                        }
+                    });
                 },
                 selectType : function (event) {
                     const type = event.target.getAttribute("value");
@@ -91,6 +129,26 @@
                     this.type = type;
                     document.getElementById("boardWriteForm").setAttribute("action","/board/"+type);
                     this.typeName = typeName;
+                }
+            },
+            mounted: function () {
+                const boardId = document.getElementById("boardId");
+                if(boardId != null) {
+                    this.boardId = boardId.value;
+                    boardId.remove();
+                }
+                const boardType = document.getElementById("boardType");
+                if(boardType != null) {
+                    const typeElement = document.getElementById("type_" + boardType.value);
+                    this.type = typeElement.value;
+                    this.typeName = typeElement.innerText;
+                    document.getElementById("typeDropdown").setAttribute("disabled","disabled");
+                    boardType.remove();
+                }
+
+                const boardSubject = document.getElementById("boardSubject");
+                if(boardSubject != null) {
+                    this.subject = boardSubject.value;
                 }
             }
         });
@@ -100,8 +158,23 @@
             oAppRef: oEditors,
             elPlaceHolder: "content",
             sSkinURI: "/plugin/se2/SmartEditor2Skin.html",
-            fCreator: "createSEditor2"
+            fCreator: "createSEditor2",
+            fOnAppLoad : function(){
+                const boardContent = document.getElementById("boardContent");
+                if(boardContent != null) {
+                    oEditors.getById["content"].exec("PASTE_HTML", [boardContent.value]);
+                    boardContent.remove();
+                }
+            }
         });
+        const message = document.getElementById("message");
+        if(message.value !== '' && message.value !== "success") {
+            alert(message.value);
+            location.href = "/board";
+        } else {
+            message.remove();
+        }
+
     </script>
 </th:block>
 </body>

@@ -7,7 +7,7 @@
 <body>
 <th:block layout:fragment="content">
     <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-    <input type="hidden" id="boardId" th:value="${board.id}">
+    <input type="hidden" id="boardId" name="boardId" th:value="${board.id}">
     <div class="container" id="main-area" style="border-color: #dddddd; border-style: solid; border-width: thin; padding: 10px; margin-bottom: 20px">
         <ul class="nav nav-pills">
             <input type="hidden" id="boardType" th:value="${board.getType()}"/>
@@ -21,7 +21,10 @@
         <div class="page-item col-xs-12" id="board-content" th:text="${board.getContent()}">
         </div>
         <div class="col-xs-12" th:if="${board.getUserId()} == ${#authentication.principal} or ${#authorization.expr('hasRole(''ROLE_ADMIN'')')}">
-            <button style="float: right; margin-top: 10px;" class="btn btn-default" onclick="deleteBoard(this)" th:value="${board.id}" >
+            <button style="float: right; margin-top: 10px;" class="btn btn-default" onclick="modifyBoard(this)" th:value="${board.id}" >
+                수정
+            </button>
+            <button style="float: right; margin-top: 10px;" class="btn btn-danger" onclick="deleteBoard(this)" th:value="${board.id}" >
                 삭제
             </button>
         </div>
@@ -43,7 +46,7 @@
                         <h4 class="media-heading" style="margin-top: 10px;">{{row.nickname}}  <small>작성일 :  {{row.formattedRegist}}</small></h4>
                         <p>{{row.content}}</p>
                     </div>
-                    <div v-if="row.userId == loginUserId">
+                    <div sec:authorize="!hasRole('ROLE_ADMIN')" v-if="row.userId == loginUserId">
                         <button style="float: right; margin-top: 10px;" class="btn btn-default" @click="deleteComment(row.id)">
                             삭제
                         </button>
@@ -110,6 +113,17 @@
                     }
                 );
             }
+        }
+
+        function modifyBoard(object) {
+            const targetId = object.value;
+            var form = document.createElement("form");
+            form.setAttribute("method","Post");
+            form.setAttribute("action","/board/write");
+            form.appendChild(document.getElementById("csrf"));
+            form.appendChild(document.getElementById("boardId"));
+            document.body.appendChild(form);
+            form.submit();
         }
 
         const commentVue = new Vue({
