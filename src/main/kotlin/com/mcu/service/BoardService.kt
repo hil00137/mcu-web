@@ -49,7 +49,7 @@ class BoardService {
     /**
      * 게시글 저장 캐시 삭제
      */
-    fun saveBoard(type : BoardType, board: Board): Board {
+    fun saveBoard(board: Board): Board {
         board.subject = StringUtil.checkScriptInjection(board.subject)
         if (StringUtil.isScriptInjection(board.subject)) {
             logger.warn("Script Injection occurred by ${board.userId}")
