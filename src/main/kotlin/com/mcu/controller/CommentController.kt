@@ -44,6 +44,7 @@ class CommentController {
         }
         comment.userId = userId
         boardService.commentCount(board, 1)
+        commentService.saveComment(comment)
         return "success"
     }
 
