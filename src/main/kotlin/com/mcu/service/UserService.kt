@@ -14,8 +14,9 @@ class UserService {
     @Autowired
     private lateinit var userRepository : UserRepository
 
-    @Cacheable(value = ["userCache"], key = "#userId")
+    @Cacheable(value = ["userCache"], key = "'userId:' + #userId")
     fun getUserById(userId : String) = userRepository.findUserByUserId(userId)
+    @Cacheable(value = ["userCache"], key = "'nickname:' + #nickname")
     fun getUserByNickname(nickname : String) = userRepository.findUserByNickname(nickname)
     @CacheEvict(value = ["userCache"], allEntries = true)
     fun registerUser(user: User): User? {

@@ -5,7 +5,6 @@ import com.mcu.model.User
 import com.mcu.service.HistoryService
 import com.mcu.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
@@ -49,7 +48,6 @@ class UserController {
         }
     }
 
-    @Cacheable(value = ["userCache"], key = "#nickname")
     @ResponseBody
     @GetMapping("/checkNickname/{nickname}")
     fun nicknameCheck(@PathVariable nickname : String) : String {
