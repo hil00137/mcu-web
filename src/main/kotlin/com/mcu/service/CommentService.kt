@@ -29,7 +29,7 @@ class CommentService {
     fun getComments(boardId: String, page : Int): List<Comment> {
         val list = commentRepository.findAllByBoardIdAndDelete(boardId, false, PageRequest.of(page, 5, Sort.by("id").descending()))
         list.forEach {
-            it.userId.let { userId -> it.nickname = userService.getUserById(userId)?.nickname?:"" }
+            it.userId.let { userId -> it.nickname = userService.getUserByUserId(userId)?.nickname?:"" }
             it.regist?.let { regist -> it.formattedRegist = DateUtil.transform(regist)  }
         }
         return list

@@ -39,7 +39,7 @@ class BoardService {
     fun getBoards(type : BoardType, page : Int): List<Board> {
         val list = boardRepository.findAllByTypeAndDelete(type.type, false, PageRequest.of(page, 10, Sort.by("id").descending()))
         list.forEach {
-            it.userId.let { userId -> it.nickname = userService.getUserById(userId)?.nickname?:"" }
+            it.userId.let { userId -> it.nickname = userService.getUserByUserId(userId)?.nickname?:"" }
             it.regist?.let { regist -> it.formattedRegist = DateUtil.transform(regist)  }
             it.update?.let { update -> it.formattedUpdate = DateUtil.transform(update)  }
         }

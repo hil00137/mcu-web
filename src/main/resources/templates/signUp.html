@@ -39,10 +39,11 @@
         <div class="form-group">
             <label class="col-sm-2 control-label" for="email">이메일</label>
             <div class="col-sm-8">
-                <input class="form-control" type="email" v-model="email" id="email" required placeholder="E-MAIL">
+                <input class="form-control" type="email" v-model="email" id="email" required placeholder="E-MAIL" v-on:focusout="emailCheck" v-on:focusin="emailCheckReset">
             </div>
         </div>
-        <div class="col-sm-offset-2"><p style="margin-left: 1%" class="text-info">이메일은 비밀번호를 찾을때 사용됩니다.</p></div>
+        <div class="col-sm-offset-2"><p style="margin-left: 1%" :class="emailMessageClass">{{emailMessage}}</p></div>
+        <div class="col-sm-offset-2"><p style="margin-left: 1%" class="text-info">이메일은 각종 정보성 내용을 발송 하는데 사용됩니다.</p></div>
         <div class="form-group">
             <button class="col-sm-offset-3 col-sm-6 btn btn-primary">가입하기</button>
         </div>
@@ -55,6 +56,7 @@
         let pwdChecked = false;
         let pwd2Checked = false;
         let nicknameChecked = false;
+        let emailChecked = false;
 
 
         new Vue({
@@ -73,7 +75,9 @@
                 pwdCheckMessageClass : '',
                 submitMessage : "",
                 nicknameMessage : "닉네임은 최대 10자리까지 입력가능합니다.",
-                nicknameMessageClass : 'text-info'
+                nicknameMessageClass : 'text-info',
+                emailMessage : "",
+                emailMessageClass : 'text-info'
             },
             methods : {
                 idCheck : function() {
@@ -100,6 +104,7 @@
                 },
                 idCheckReset : function() {
                     idChecked = false;
+                    this.submitMessage = "";
                 },
                 pwdCheck : function() {
                     const test = /^.*(?=^.{8,12}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/.exec(this.password);
@@ -116,6 +121,7 @@
                 },
                 pwdCheckReset : function() {
                     pwdChecked = false;
+                    this.submitMessage = "";
                 },
                 pwd2Check : function() {
                     if(this.password !== this.passwordCheck) {
@@ -131,6 +137,7 @@
                 },
                 pwd2CheckRest : function() {
                     pwd2Checked = false;
+                    this.submitMessage = "";
                 },
                 nicknameCheck : function() {
                     this.nickname = this.nickname.trim();
@@ -161,9 +168,28 @@
                 },
                 nicknameCheckReset : function() {
                     nicknameChecked = false;
+                    this.submitMessage = "";
+                },
+                emailCheck : function() {
+                    axios.get('/user/checkEmail/'+this.email)
+                        .then(value => {
+                            if(value.data === "OK") {
+                                this.emailMessage = "사용가능한 이메일입니다.";
+                                this.emailMessageClass = 'text-primary';
+                                emailChecked = true;
+                            } else {
+                                this.emailMessage = "중복된 이메일입니다.";
+                                this.emailMessageClass = 'text-danger';
+                                emailChecked = false;
+                            }
+                        });
+                },
+                emailCheckReset : function() {
+                    emailChecked = false;
+                    this.submitMessage = "";
                 },
                 submit : function() {
-                    if(!idChecked || !pwdChecked || !pwd2Checked || !nicknameChecked) {
+                    if(!idChecked || !pwdChecked || !pwd2Checked || !nicknameChecked || !emailChecked) {
                         this.submitMessage = "입력되지 않은 항목이 있습니다.";
                         return false;
                     } else {
@@ -180,7 +206,7 @@
                             }
                         ).then(value => {
                             if(value.data === "OK") {
-                                alert("회원가입이 완료되었습니다.");
+                                alert("회원가입이 완료되었습니다.\n인증메일이 발송되었습니다.");
                                 location.href = "/user/login";
                             } else {
                                 alert(value.data);

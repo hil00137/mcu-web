@@ -5,6 +5,7 @@
 </head>
 <body>
     <th:block layout:fragment="content">
+        <input type="hidden" th:if="${#request.getAttribute('errorMessage') != null}" th:value="${#request.getAttribute('errorMessage')}" id="errorMessage">
         <div class="container-fluid">
             <div class="row no-gutter">
                 <div class="d-none d-md-flex col-md-4 col-lg-6 bg-image"></div>
@@ -156,6 +157,10 @@
         </style>
     </th:block>
     <th:block layout:fragment="script">
+        <script th:if="${#request.getAttribute('errorMessage') != null}">
+            alert(document.getElementById("errorMessage").value);
+            window.location.replace("http://www.mcedu.co.kr/user/login")
+        </script>
         <script>
             const agent = navigator.userAgent.toLowerCase();
             let loginOk = true;

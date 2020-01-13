@@ -19,6 +19,10 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class AuthFailureHandler : SimpleUrlAuthenticationFailureHandler() {
+
+    @Autowired
+    private lateinit var userService: UserService
+
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
@@ -26,7 +30,17 @@ class AuthFailureHandler : SimpleUrlAuthenticationFailureHandler() {
     override fun onAuthenticationFailure(request: HttpServletRequest?, response: HttpServletResponse?, exception: AuthenticationException?) {
         response!!.status = HttpServletResponse.SC_UNAUTHORIZED
         logger.info("Login Fail")
-        redirectStrategy.sendRedirect(request, response, "/user/login")
+        val user = userService.getUserByUserId(request?.getParameter("userId")?:"")
+        if (user == null) {
+            request?.setAttribute("errorMessage", "존재하지 않는 사용자입니다.")
+        } else if (user.mailAuth == "wait") {
+            request?.setAttribute("errorMessage", "메일인증이 되지않았습니다.")
+        } else if (user.mailAuth == "fail") {
+            request?.setAttribute("errorMessage", user.mailAuthFailReason)
+        } else {
+            request?.setAttribute("errorMessage", "비밀번호가 틀렸습니다.")
+        }
+        request?.getRequestDispatcher("/user/login")?.forward(request,response)
     }
 }
 
@@ -58,8 +72,8 @@ class AuthProvider : AuthenticationProvider {
         val password = HashUtil.sha512(password = authentication?.credentials.toString())
         logger.info("Try Login : $userId")
 
-        val user = userService.getUserById(userId)
-        if ( user == null || user.password != password) {
+        val user = userService.getUserByUserId(userId)
+        if ( user == null || user.password != password || user.mailAuth != "success") {
             return null
         }
 
