@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 
 
@@ -35,7 +34,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http?:return
         http.authorizeRequests()
                 .antMatchers("/","/user/login","/user/signUp","/error**","/static/**","/js/**","/css/**").permitAll()
-                .antMatchers("/user/check**/**").permitAll()
+                .antMatchers("/user/check**/**","/user/emailAuth*").permitAll()
                 .antMatchers("/**").access("ROLE_USER")
                 .antMatchers("/**").access("ROLE_ADMIN")
                 .antMatchers("/**").authenticated()
