@@ -1,7 +1,7 @@
 package com.mcu.agent
 
 import com.amazonaws.services.ec2.model.Instance
-import com.mcu.model.DynamoServer
+import com.mcu.model.Server
 import com.mcu.service.AwsManagementService
 import com.mcu.service.HistoryService
 import com.mcu.service.McuServerManagementService
@@ -48,7 +48,7 @@ class ServerManagementAgent {
         executorService.execute {
             try {
                 while(true) {
-                    val awsIdMap = ConcurrentHashMap<String, DynamoServer>()
+                    val awsIdMap = ConcurrentHashMap<String, Server>()
                     val mcuServerList = mcuServerManagementService.getAllMcuServerList()
                     for (mcuServer in mcuServerList) {
                         val aws = mcuServer.aws
@@ -79,7 +79,7 @@ class ServerManagementAgent {
         executorService.shutdown()
     }
 
-    private fun awsUpdate(instance: Instance, server: DynamoServer?): DynamoServer? {
+    private fun awsUpdate(instance: Instance, server: Server?): Server? {
         if (server == null) return null
 
         when (instance.state.code) {
@@ -105,7 +105,7 @@ class ServerManagementAgent {
         executorService.shutdownNow()
     }
 
-    private fun mcUpdate(server: DynamoServer?, property : List<String>) {
+    private fun mcUpdate(server: Server?, property : List<String>) {
         if (server == null) {
             return
         }

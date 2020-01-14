@@ -1,7 +1,7 @@
 package com.mcu.controller
 
-import com.mcu.model.DynamoServer
-import com.mcu.repository.DynamoServerRepository
+import com.mcu.model.Server
+import com.mcu.repository.ServerRepository
 import com.mcu.service.McuServerManagementService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,10 +14,10 @@ class WebRestController {
     lateinit var mcuServerManagementService : McuServerManagementService
 
     @Autowired
-    lateinit var dynamoUserRepository: DynamoServerRepository
+    lateinit var dynamoUserRepository: ServerRepository
 
     @Autowired
-    lateinit var dynamoServerRepository: DynamoServerRepository
+    lateinit var dynamoServerRepository: ServerRepository
 
     @GetMapping("/migration/server")
     fun moveUserData(): String {
@@ -55,7 +55,7 @@ class WebRestController {
 
     @GetMapping("/migration/pushTest")
     fun pushData(): String {
-        val bbb = DynamoServer("bbb")
+        val bbb = Server("bbb")
 //        bbb.aws?.awsId = "aba"
 
         val ccc = dynamoServerRepository.save(bbb)

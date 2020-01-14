@@ -5,7 +5,7 @@ import com.mcu.configuration.DynamoDbConfig
 import java.time.LocalDateTime
 
 @DynamoDBTable(tableName = "Server")
-class DynamoServer(@DynamoDBHashKey(attributeName = "name") var name: String = "") {
+class Server(@DynamoDBHashKey(attributeName = "name") var name: String = "") {
     @DynamoDBAttribute(attributeName = "ip")
     var ip: String = ""
 
