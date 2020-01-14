@@ -1,6 +1,7 @@
 package com.mcu.service
 
-import com.mcu.model.Server
+import com.mcu.model.DynamoServer
+import com.mcu.repository.DynamoServerRepository
 import com.mcu.repository.ServerRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
@@ -13,15 +14,18 @@ class McuServerManagementService {
     @Autowired
     private lateinit var serverRepository: ServerRepository
 
-    fun findByName(name : String) : Server? {
-        return serverRepository.findByName(name)
+    @Autowired
+    private lateinit var dynamoServerRepository: DynamoServerRepository
+
+    fun findByName(name : String) : DynamoServer? {
+        return dynamoServerRepository.findByName(name)
     }
 
-    fun getAllMcuServerList(): MutableList<Server> {
-        return serverRepository.findAll()
+    fun getAllMcuServerList(): MutableList<DynamoServer> {
+        return dynamoServerRepository.findAll()
     }
 
-    fun updateProperty(server : Server): Server {
-        return serverRepository.save(server)
+    fun updateProperty(server : DynamoServer): DynamoServer {
+        return dynamoServerRepository.save(server)
     }
 }

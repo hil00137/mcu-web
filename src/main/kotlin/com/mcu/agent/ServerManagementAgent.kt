@@ -1,7 +1,7 @@
 package com.mcu.agent
 
 import com.amazonaws.services.ec2.model.Instance
-import com.mcu.model.Server
+import com.mcu.model.DynamoServer
 import com.mcu.service.AwsManagementService
 import com.mcu.service.HistoryService
 import com.mcu.service.McuServerManagementService
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.DataOutputStream
-import java.lang.Exception
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.time.LocalDateTime
@@ -49,7 +48,7 @@ class ServerManagementAgent {
         executorService.execute {
             try {
                 while(true) {
-                    val awsIdMap = ConcurrentHashMap<String, Server>()
+                    val awsIdMap = ConcurrentHashMap<String, DynamoServer>()
                     val mcuServerList = mcuServerManagementService.getAllMcuServerList()
                     for (mcuServer in mcuServerList) {
                         val aws = mcuServer.aws
@@ -80,7 +79,7 @@ class ServerManagementAgent {
         executorService.shutdown()
     }
 
-    private fun awsUpdate(instance: Instance, server: Server?): Server? {
+    private fun awsUpdate(instance: Instance, server: DynamoServer?): DynamoServer? {
         if (server == null) return null
 
         when (instance.state.code) {
@@ -106,7 +105,7 @@ class ServerManagementAgent {
         executorService.shutdownNow()
     }
 
-    private fun mcUpdate(server: Server?, property : List<String>) {
+    private fun mcUpdate(server: DynamoServer?, property : List<String>) {
         if (server == null) {
             return
         }

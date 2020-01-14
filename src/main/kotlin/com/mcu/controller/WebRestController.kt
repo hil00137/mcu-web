@@ -1,8 +1,10 @@
 package com.mcu.controller
 
-import com.mcu.model.User
-import com.mcu.repository.MongoUserRepository
-import com.mcu.repository.UserRepository
+import com.mcu.model.DynamoServer
+import com.mcu.model.DynamoServer.Aws
+import com.mcu.model.DynamoServer.Minecraft
+import com.mcu.repository.DynamoServerRepository
+import com.mcu.repository.ServerRepository
 import com.mcu.service.McuServerManagementService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,26 +17,58 @@ class WebRestController {
     lateinit var mcuServerManagementService : McuServerManagementService
 
     @Autowired
-    lateinit var dynamoUserRepository: UserRepository
+    lateinit var dynamoUserRepository: DynamoServerRepository
 
     @Autowired
-    lateinit var userRepository: MongoUserRepository
+    lateinit var dynamoServerRepository: DynamoServerRepository
 
-    @GetMapping("/migration/user")
+    @Autowired
+    lateinit var serverRepository: ServerRepository
+
+    @GetMapping("/migration/server")
     fun moveUserData(): String {
-        val list = userRepository.findAll()
-        for (user in list) {
-            val dynamoUser = User(userId = user.userId)
-            dynamoUser.email = user.email
-            dynamoUser.auth = user.auth
-            dynamoUser.mailAuth = user.mailAuth
-            dynamoUser.mailAuthCode = user.mailAuthCode
-            dynamoUser.mailAuthFailReason = user.mailAuthFailReason
-            dynamoUser.nickname = user.nickname
-            dynamoUser.password = user.password
-            dynamoUser.regDate = user.regDate
-            dynamoUserRepository.save(dynamoUser)
+        val list = serverRepository.findAll()
+        for (server in list) {
+            val dynamoServer = DynamoServer(name = server.name)
+            dynamoServer.ip = server.ip
+            dynamoServer.aws = Aws()
+            dynamoServer.aws.awsId = server.aws.awsId
+            dynamoServer.aws.online = server.aws.online
+            dynamoServer.aws.update = server.aws.update
+            dynamoServer.aws.start = server.aws.start
+            dynamoServer.aws.code = server.aws.code
+            dynamoServer.minecraft = Minecraft()
+            dynamoServer.minecraft.online = server.minecraft.online
+            dynamoServer.minecraft.zeroTime = server.minecraft.zeroTime
+            dynamoServer.minecraft.update = server.minecraft.update
+            dynamoServer.minecraft.now = server.minecraft.now
+            dynamoServer.minecraft.max = server.minecraft.max
+            dynamoServer.minecraft.link = server.minecraft.link
+            dynamoServerRepository.save(dynamoServer)
         }
         return "success"
+    }
+
+    @GetMapping("/migration/test")
+    fun getData(): String {
+        val aaa = dynamoServerRepository.findByName("aaa")
+        return if(aaa != null) {
+            "OK"
+        } else {
+            "fail"
+        }
+    }
+
+    @GetMapping("/migration/pushTest")
+    fun pushData(): String {
+        val bbb = DynamoServer("bbb")
+//        bbb.aws?.awsId = "aba"
+
+        val ccc = dynamoServerRepository.save(bbb)
+        return if(ccc != null) {
+            "OK"
+        } else {
+            "fail"
+        }
     }
 }
