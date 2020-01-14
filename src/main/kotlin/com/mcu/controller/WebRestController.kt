@@ -1,8 +1,8 @@
 package com.mcu.controller
 
-import com.mcu.model.DynamoUser
-import com.mcu.repository.DynamoUserRepository
+import com.mcu.model.User
 import com.mcu.repository.MongoUserRepository
+import com.mcu.repository.UserRepository
 import com.mcu.service.McuServerManagementService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,7 +15,7 @@ class WebRestController {
     lateinit var mcuServerManagementService : McuServerManagementService
 
     @Autowired
-    lateinit var dynamoUserRepository: DynamoUserRepository
+    lateinit var dynamoUserRepository: UserRepository
 
     @Autowired
     lateinit var userRepository: MongoUserRepository
@@ -24,7 +24,7 @@ class WebRestController {
     fun moveUserData(): String {
         val list = userRepository.findAll()
         for (user in list) {
-            val dynamoUser = DynamoUser(userId = user.userId)
+            val dynamoUser = User(userId = user.userId)
             dynamoUser.email = user.email
             dynamoUser.auth = user.auth
             dynamoUser.mailAuth = user.mailAuth

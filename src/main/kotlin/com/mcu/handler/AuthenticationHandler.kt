@@ -1,6 +1,6 @@
 package com.mcu.handler
 
-import com.mcu.model.DynamoUser
+import com.mcu.model.User
 import com.mcu.service.UserService
 import com.mcu.util.HashUtil
 import org.slf4j.LoggerFactory
@@ -94,4 +94,4 @@ class AuthProvider : AuthenticationProvider {
 
 }
 
-class McuAuthentication(principal: String, credentials: String, authorities: ArrayList<GrantedAuthority>, var user: DynamoUser) : UsernamePasswordAuthenticationToken(principal, credentials, authorities)
+class McuAuthentication(principal: String, credentials: String, authorities: ArrayList<GrantedAuthority>, var user: User) : UsernamePasswordAuthenticationToken(principal, credentials, authorities)

@@ -1,10 +1,8 @@
 package com.mcu.service
 
-import com.mcu.model.DynamoUser
 import com.mcu.model.Mail
-import com.mcu.model.MongoUser
-import com.mcu.repository.DynamoUserRepository
-import com.mcu.repository.MongoUserRepository
+import com.mcu.model.User
+import com.mcu.repository.UserRepository
 import com.mcu.util.HashUtil
 import com.mcu.util.MailSendUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,16 +18,13 @@ import java.util.*
 class UserService {
 
     @Autowired
-    private lateinit var userRepository : MongoUserRepository
-
-    @Autowired
     private lateinit var mailSendUtil: MailSendUtil
 
     @Value("\${homepage.address}")
     private lateinit var homepageUrl : String
 
     @Autowired
-    private lateinit var dynamoUserRepository : DynamoUserRepository
+    private lateinit var dynamoUserRepository : UserRepository
 
     @Cacheable(value = ["userCache"], key = "'userId:' + #userId")
     fun getUserByUserId(userId : String) = dynamoUserRepository.findUserByUserId(userId)
@@ -38,7 +33,7 @@ class UserService {
     @Cacheable(value = ["userCache"], key = "'email:' + #email")
     fun getUserByEmail(email : String) = dynamoUserRepository.findUserByEmail(email)
     @CacheEvict(value = ["userCache"], allEntries = true)
-    fun registerUser(user: DynamoUser): DynamoUser? {
+    fun registerUser(user: User): User? {
         user.password = HashUtil.sha512(user.password)
         user.mailAuthCode = UUID.randomUUID().toString().replace("-","").substring(0,9)
         val ip = this.getIp()
@@ -49,7 +44,7 @@ class UserService {
             mail.subject = "마크대학 이메일 인증메일입니다"
             mail.setEmailAuthContent(ip, homepageUrl, user)
             val resultMap = mailSendUtil.sendEmail(mail)
-            val targetUser = this.getUserByUserId(user.userId?:"")?:DynamoUser()
+            val targetUser = this.getUserByUserId(user.userId?:"")?:User()
 
             if(resultMap["result"] == "success") {
                 targetUser.mailAuth = "wait"
@@ -63,8 +58,6 @@ class UserService {
         return dynamoUserRepository.save(user)
     }
 
-    fun save(user : MongoUser) : MongoUser? = userRepository.save(user)
-
     fun getIp() : String {
         val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
         var ip: String? = request.getHeader("X-FORWARDED-FOR")
@@ -74,7 +67,7 @@ class UserService {
         return ip?:""
     }
 
-    fun emailAuthSuccess(user: DynamoUser) {
+    fun emailAuthSuccess(user: User) {
         user.mailAuth = "success"
         user.mailAuthCode = null
         dynamoUserRepository.save(user)

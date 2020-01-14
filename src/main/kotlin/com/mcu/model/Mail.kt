@@ -28,7 +28,7 @@ class Mail {
         this.header = stringBuilder.toString()
     }
 
-    fun setEmailAuthContent(ip : String, url : String, user: DynamoUser) {
+    fun setEmailAuthContent(ip : String, url : String, user: User) {
         val userId = HashUtil.encryptAES256(user.userId?:"")
         val mailAuthCode = HashUtil.encryptAES256(user.mailAuthCode!!)
         val stringBuilder = StringBuilder()

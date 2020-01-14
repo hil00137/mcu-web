@@ -6,7 +6,7 @@ import java.io.Serializable
 import java.time.LocalDateTime
 
 @DynamoDBTable(tableName = "User")
-class DynamoUser(@DynamoDBHashKey(attributeName = "userId") var userId: String? = "") : Serializable {
+class User(@DynamoDBHashKey(attributeName = "userId") var userId: String? = "") : Serializable {
 
     @DynamoDBAttribute(attributeName = "password")
     var password : String = ""

@@ -1,23 +1,23 @@
 package com.mcu.repository
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
-import com.mcu.model.DynamoUser
+import com.mcu.model.User
 import com.mcu.util.AwsConnector
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-class DynamoUserRepository {
+class UserRepository {
     @Autowired
     private lateinit var awsConnector: AwsConnector
 
-    fun save(item : DynamoUser): DynamoUser? {
+    fun save(item : User): User? {
         awsConnector.getDynamoDBMapper().save(item)
         return awsConnector.getDynamoDBMapper().load(item)
     }
 
-    fun findUserByUserId(userId : String) : DynamoUser? {
-        val item= DynamoUser(userId)
+    fun findUserByUserId(userId : String) : User? {
+        val item= User(userId)
         return try {
             awsConnector.getDynamoDBMapper().load(item)
         } catch (e : Exception) {
@@ -25,13 +25,13 @@ class DynamoUserRepository {
         }
     }
 
-    fun findUserByNickname(nickname : String) : DynamoUser? {
-        val dynamoUser = DynamoUser().also { it.nickname = nickname }
-        val queryExpression = DynamoDBQueryExpression<DynamoUser>()
+    fun findUserByNickname(nickname : String) : User? {
+        val dynamoUser = User().also { it.nickname = nickname }
+        val queryExpression = DynamoDBQueryExpression<User>()
         queryExpression.indexName = "User-nickname"
         queryExpression.hashKeyValues = dynamoUser
         queryExpression.isConsistentRead = false
-        val result = awsConnector.getDynamoDBMapper().query(DynamoUser::class.java, queryExpression)
+        val result = awsConnector.getDynamoDBMapper().query(User::class.java, queryExpression)
         return if(result.size == 0) {
             null
         }
@@ -40,13 +40,13 @@ class DynamoUserRepository {
         }
     }
 
-    fun findUserByEmail(email : String) : DynamoUser? {
-        val dynamoUser = DynamoUser().also { it.email = email }
-        val queryExpression = DynamoDBQueryExpression<DynamoUser>()
+    fun findUserByEmail(email : String) : User? {
+        val dynamoUser = User().also { it.email = email }
+        val queryExpression = DynamoDBQueryExpression<User>()
         queryExpression.indexName = "User-email"
         queryExpression.hashKeyValues = dynamoUser
         queryExpression.isConsistentRead = false
-        val result = awsConnector.getDynamoDBMapper().query(DynamoUser::class.java, queryExpression)
+        val result = awsConnector.getDynamoDBMapper().query(User::class.java, queryExpression)
         return if(result.size == 0) {
             null
         }

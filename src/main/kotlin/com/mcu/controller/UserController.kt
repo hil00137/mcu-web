@@ -1,7 +1,7 @@
 package com.mcu.controller
 
-import com.mcu.model.DynamoUser
 import com.mcu.model.History
+import com.mcu.model.User
 import com.mcu.service.HistoryService
 import com.mcu.service.UserService
 import com.mcu.util.HashUtil
@@ -36,7 +36,7 @@ class UserController {
 
     @ResponseBody
     @PostMapping("/signUp")
-    fun signUp(@RequestBody user: DynamoUser?) : String {
+    fun signUp(@RequestBody user: User?) : String {
         user?.let {
             userService.registerUser(it)?:"saved error"
         }?: return "error"
