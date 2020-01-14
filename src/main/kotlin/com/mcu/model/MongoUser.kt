@@ -5,8 +5,9 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.io.Serializable
 import java.time.LocalDateTime
 
+@Deprecated("migration complete")
 @Document(collection = "user")
-class User : Serializable {
+class MongoUser : Serializable {
     @Id
     lateinit var id : String
     var userId : String = ""

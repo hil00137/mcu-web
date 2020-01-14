@@ -28,8 +28,8 @@ class Mail {
         this.header = stringBuilder.toString()
     }
 
-    fun setEmailAuthContent(ip : String, url : String, user: User) {
-        val userId = HashUtil.encryptAES256(user.userId)
+    fun setEmailAuthContent(ip : String, url : String, user: DynamoUser) {
+        val userId = HashUtil.encryptAES256(user.userId?:"")
         val mailAuthCode = HashUtil.encryptAES256(user.mailAuthCode!!)
         val stringBuilder = StringBuilder()
         stringBuilder.append("안녕하세요. 마크대학입니다. $brTag")

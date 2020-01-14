@@ -171,6 +171,21 @@
                     this.submitMessage = "";
                 },
                 emailCheck : function() {
+                    this.email = this.email.trim();
+                    if (this.email === "") {
+                        emailChecked = false;
+                        this.emailMessage = "이메일이 비어있습니다.";
+                        this.emailMessageClass = 'text-danger';
+                        return false;
+                    }
+
+                    if (this.email.indexOf("@") < 0) {
+                        nicknameChecked = false;
+                        this.emailMessage = "email 형태가 아닙니다.";
+                        this.emailMessageClass = 'text-danger';
+                        return false;
+                    }
+
                     axios.get('/user/checkEmail/'+this.email)
                         .then(value => {
                             if(value.data === "OK") {

@@ -35,6 +35,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http.authorizeRequests()
                 .antMatchers("/","/user/login","/user/signUp","/error**","/static/**","/js/**","/css/**").permitAll()
                 .antMatchers("/user/check**/**","/user/emailAuth*").permitAll()
+                .antMatchers("/migration/**").permitAll()
                 .antMatchers("/**").access("ROLE_USER")
                 .antMatchers("/**").access("ROLE_ADMIN")
                 .antMatchers("/**").authenticated()

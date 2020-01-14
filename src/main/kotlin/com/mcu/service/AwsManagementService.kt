@@ -17,7 +17,7 @@ class AwsManagementService {
 
     fun getInstanceList(instanceIds : List<String>): ArrayList<Instance> {
         val request = DescribeInstancesRequest().withInstanceIds(instanceIds)
-        val connection = awsConnector.getConnection()
+        val connection = awsConnector.getEC2Connection()
         val result = connection.describeInstances(request)
         val instanceList = ArrayList<Instance>()
         for (reservation in result.reservations) {
@@ -30,14 +30,14 @@ class AwsManagementService {
 
     fun startInstance(instanceId : String): Int {
         val request = StartInstancesRequest().withInstanceIds(instanceId)
-        val connection = awsConnector.getConnection()
+        val connection = awsConnector.getEC2Connection()
         val result = connection.startInstances(request)
         return result.startingInstances.size
     }
 
     fun stopInstance(instanceId : String) : Int {
         val request = StopInstancesRequest().withInstanceIds(instanceId)
-        val connection = awsConnector.getConnection()
+        val connection = awsConnector.getEC2Connection()
         val result = connection.stopInstances(request)
         return result.stoppingInstances.size
     }
