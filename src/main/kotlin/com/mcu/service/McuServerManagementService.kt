@@ -2,7 +2,6 @@ package com.mcu.service
 
 import com.mcu.model.DynamoServer
 import com.mcu.repository.DynamoServerRepository
-import com.mcu.repository.ServerRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 import org.springframework.stereotype.Service
@@ -11,8 +10,6 @@ import org.springframework.stereotype.Service
 @Service
 class McuServerManagementService {
 
-    @Autowired
-    private lateinit var serverRepository: ServerRepository
 
     @Autowired
     private lateinit var dynamoServerRepository: DynamoServerRepository

@@ -1,10 +1,7 @@
 package com.mcu.controller
 
 import com.mcu.model.DynamoServer
-import com.mcu.model.DynamoServer.Aws
-import com.mcu.model.DynamoServer.Minecraft
 import com.mcu.repository.DynamoServerRepository
-import com.mcu.repository.ServerRepository
 import com.mcu.service.McuServerManagementService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,30 +19,27 @@ class WebRestController {
     @Autowired
     lateinit var dynamoServerRepository: DynamoServerRepository
 
-    @Autowired
-    lateinit var serverRepository: ServerRepository
-
     @GetMapping("/migration/server")
     fun moveUserData(): String {
-        val list = serverRepository.findAll()
-        for (server in list) {
-            val dynamoServer = DynamoServer(name = server.name)
-            dynamoServer.ip = server.ip
-            dynamoServer.aws = Aws()
-            dynamoServer.aws.awsId = server.aws.awsId
-            dynamoServer.aws.online = server.aws.online
-            dynamoServer.aws.update = server.aws.update
-            dynamoServer.aws.start = server.aws.start
-            dynamoServer.aws.code = server.aws.code
-            dynamoServer.minecraft = Minecraft()
-            dynamoServer.minecraft.online = server.minecraft.online
-            dynamoServer.minecraft.zeroTime = server.minecraft.zeroTime
-            dynamoServer.minecraft.update = server.minecraft.update
-            dynamoServer.minecraft.now = server.minecraft.now
-            dynamoServer.minecraft.max = server.minecraft.max
-            dynamoServer.minecraft.link = server.minecraft.link
-            dynamoServerRepository.save(dynamoServer)
-        }
+//        val list = serverRepository.findAll()
+//        for (server in list) {
+//            val dynamoServer = DynamoServer(name = server.name)
+//            dynamoServer.ip = server.ip
+//            dynamoServer.aws = Aws()
+//            dynamoServer.aws.awsId = server.aws.awsId
+//            dynamoServer.aws.online = server.aws.online
+//            dynamoServer.aws.update = server.aws.update
+//            dynamoServer.aws.start = server.aws.start
+//            dynamoServer.aws.code = server.aws.code
+//            dynamoServer.minecraft = Minecraft()
+//            dynamoServer.minecraft.online = server.minecraft.online
+//            dynamoServer.minecraft.zeroTime = server.minecraft.zeroTime
+//            dynamoServer.minecraft.update = server.minecraft.update
+//            dynamoServer.minecraft.now = server.minecraft.now
+//            dynamoServer.minecraft.max = server.minecraft.max
+//            dynamoServer.minecraft.link = server.minecraft.link
+//            dynamoServerRepository.save(dynamoServer)
+//        }
         return "success"
     }
 

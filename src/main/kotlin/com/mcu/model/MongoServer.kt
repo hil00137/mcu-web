@@ -5,8 +5,9 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.LocalDateTime
 
+@Deprecated("migration complete")
 @Document(collection = "server")
-class Server {
+class MongoServer {
 
     @Id lateinit var id : String
     @Field lateinit var name : String
