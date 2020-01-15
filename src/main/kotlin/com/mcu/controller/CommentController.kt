@@ -1,7 +1,7 @@
 package com.mcu.controller
 
-import com.mcu.model.Board
 import com.mcu.model.Comment
+import com.mcu.model.DynamoBoard
 import com.mcu.model.History
 import com.mcu.service.BoardService
 import com.mcu.service.CommentService
@@ -35,7 +35,7 @@ class CommentController {
     fun saveComment(@RequestBody comment : Comment) : String {
         val userId = SecurityContextHolder.getContext().authentication.principal as String
         val boardId: String? = comment.boardId
-        val board: Board? = boardId?.let {
+        val board: DynamoBoard? = boardId?.let {
             boardService.getBoardById(it)
         }
         if (board == null) {
@@ -56,7 +56,7 @@ class CommentController {
     fun getComments(@PathVariable boardId: String, @PathVariable page: String) : Map<String, Any> {
         logger.info("Get comments id: $boardId, page : $page")
         var pageNum: Int
-        var board : Board? = null
+        var board : DynamoBoard? = null
         try {
             board = boardService.getBoardById(boardId) ?: return HashMap()
             pageNum = page.toInt()

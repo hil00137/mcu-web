@@ -1,12 +1,13 @@
-package com.mcu.model
+package com.mcu.model.deprecated
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.io.Serializable
 import java.time.LocalDateTime
 
+@Deprecated("migration complete")
 @Document
-class Board : Serializable {
+class MongoBoard : Serializable {
     @Id
     lateinit var id : String                            // Mongodb 고유값
     lateinit var type : String                          // 게시판 타입
@@ -22,12 +23,4 @@ class Board : Serializable {
     var deleteDate : LocalDateTime? = null
     var hit : Int = 0                                   // 조회수
     var commentCount : Int = 0
-}
-
-/**
- * 게시판 구분
- */
-enum class BoardType(val type: String) {
-    SUGGESTION("suggestion"),
-    NOTIFICATION("notification")
 }

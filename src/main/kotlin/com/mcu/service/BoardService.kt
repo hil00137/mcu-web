@@ -1,16 +1,17 @@
 package com.mcu.service
 
-import com.mcu.model.Board
+import com.amazonaws.services.dynamodbv2.datamodeling.QueryResultPage
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.mcu.model.BoardType
+import com.mcu.model.DynamoBoard
+import com.mcu.model.DynamoDeletedBoard
 import com.mcu.model.History
-import com.mcu.repository.BoardRepository
+import com.mcu.repository.DynamoBoardRepository
 import com.mcu.util.DateUtil
 import com.mcu.util.StringUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -21,7 +22,7 @@ class BoardService {
     }
 
     @Autowired
-    lateinit var boardRepository: BoardRepository
+    lateinit var dynamoBoardRepository: DynamoBoardRepository
 
     @Autowired
     lateinit var historyService: HistoryService
@@ -31,25 +32,33 @@ class BoardService {
     /**
      * 해당 게시판의 게시글 개수
      */
-    fun getCountOfBoard(type : BoardType) = boardRepository.countByTypeAndDelete(type.type, false)
+    fun getCountOfBoard(type : BoardType) = dynamoBoardRepository.countByType(type.type)
 
     /**
      * 해당 게시판의 해당 페이지 게시글
      */
-    fun getBoards(type : BoardType, page : Int): List<Board> {
-        val list = boardRepository.findAllByTypeAndDelete(type.type, false, PageRequest.of(page, 10, Sort.by("id").descending()))
-        list.forEach {
+    @Cacheable(value = ["boardCache"])
+    fun getBoards(type : BoardType, page : Int): MutableList<DynamoBoard> {
+        var resultPage : QueryResultPage<DynamoBoard>? = null
+        for (i in 0 .. page) {
+            val last = resultPage?.lastEvaluatedKey?:HashMap<String, AttributeValue>()
+            resultPage = dynamoBoardRepository.findAllByType(type.type, last)
+        }
+
+        val list = resultPage?.results
+
+        list?.forEach {
             it.userId.let { userId -> it.nickname = userService.getUserByUserId(userId)?.nickname?:"" }
             it.regist?.let { regist -> it.formattedRegist = DateUtil.transform(regist)  }
             it.update?.let { update -> it.formattedUpdate = DateUtil.transform(update)  }
         }
-        return list
+        return list?: ArrayList()
     }
 
     /**
      * 게시글 저장 캐시 삭제
      */
-    fun saveBoard(board: Board): Board {
+    fun saveBoard(board: DynamoBoard): DynamoBoard {
         board.subject = StringUtil.checkScriptInjection(board.subject)
         if (StringUtil.isScriptInjection(board.subject)) {
             logger.warn("Script Injection occurred by ${board.userId}")
@@ -62,41 +71,37 @@ class BoardService {
             logger.warn("Script Injection occurred by ${board.userId}")
             board.content = StringUtil.removeLabel(board.content)
         }
-        return boardRepository.save(board)
+        return dynamoBoardRepository.save(board)
     }
 
     /**
      * id로 검색하기
      */
-    fun getBoardById(id: String) : Board? {
-        val result = boardRepository.findById(id)
-        return if(result.isPresent) {
-            result.get()
-        } else {
-            null
-        }
+    fun getBoardById(id: String) : DynamoBoard? {
+        return dynamoBoardRepository.findById(id)
     }
 
     /**
-     * 삭제처리 (삭제는 flag를 바꿔 기록을 남겨둔다.)
+     * 삭제처리 (삭제는 backup table로 옮긴다)
      */
-    fun deleteBoard(board: Board) {
-        board.delete = true
-        board.deleteDate = LocalDateTime.now()
-        boardRepository.save(board)
+    fun deleteBoard(board: DynamoBoard) {
+        val deletedBoard = DynamoDeletedBoard(board)
+        deletedBoard.deleteDate = LocalDateTime.now()
+        dynamoBoardRepository.delete(board)
+        dynamoBoardRepository.saveBackupTable(deletedBoard)
     }
 
     @Cacheable(value = ["hitCache"], key = "#userId + ':' + #board.id")
-    fun hitCount(board: Board, userId : String) {
+    fun hitCount(board: DynamoBoard, userId : String) {
         board.hit++
-        boardRepository.save(board)
+        dynamoBoardRepository.save(board)
     }
 
     /**
      * comment 숫자 늘리기
      */
-    fun commentCount(board: Board, num: Int) {
+    fun commentCount(board: DynamoBoard, num: Int) {
         board.commentCount += num
-        boardRepository.save(board)
+        dynamoBoardRepository.save(board)
     }
 }

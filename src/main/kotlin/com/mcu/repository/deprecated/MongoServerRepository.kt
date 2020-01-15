@@ -1,6 +1,6 @@
-package com.mcu.repository
+package com.mcu.repository.deprecated
 
-import com.mcu.model.MongoServer
+import com.mcu.model.deprecated.MongoServer
 
 import org.springframework.data.mongodb.repository.MongoRepository
 

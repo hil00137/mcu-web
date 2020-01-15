@@ -8,6 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository
 interface CommentRepository : PagingAndSortingRepository<Comment, String> {
     fun countByBoardIdAndDelete(boardId : String, delete: Boolean) : Long
     fun findAllByBoardIdAndDelete(boardId: String, delete : Boolean, pageable: Pageable) : List<Comment>
+    fun findAllByBoardId(boardId: String) : List<Comment>
     @CacheEvict(value = ["commentCache"], allEntries = true)
     override fun <S : Comment?> save(entity: S): S {
         return this.save(entity)

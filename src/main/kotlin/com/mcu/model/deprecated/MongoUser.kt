@@ -1,4 +1,4 @@
-package com.mcu.model
+package com.mcu.model.deprecated
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
