@@ -1,11 +1,11 @@
 package com.mcu.controller
 
+import com.mcu.model.Board
 import com.mcu.model.BoardType
-import com.mcu.model.DynamoBoard
-import com.mcu.model.DynamoDeletedBoard
+import com.mcu.model.DeletedBoard
 import com.mcu.repository.BoardArchiveRepository
+import com.mcu.repository.BoardRepository
 import com.mcu.repository.CommentRepository
-import com.mcu.repository.DynamoBoardRepository
 import com.mcu.repository.deprecated.MongoBoardRepository
 import com.mcu.service.McuServerManagementService
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,7 +24,7 @@ class WebRestController {
     lateinit var boardRepository: MongoBoardRepository
 
     @Autowired
-    lateinit var dynamoBoardRepository: DynamoBoardRepository
+    lateinit var dynamoBoardRepository: BoardRepository
 
     @Autowired
     lateinit var commentRepository: CommentRepository
@@ -37,7 +37,7 @@ class WebRestController {
         val list = boardRepository.findAll()
         for (board in list) {
             if(!board.delete) {
-                val dynamoBoard = DynamoBoard()
+                val dynamoBoard = Board()
                 dynamoBoard.content = board.content
                 dynamoBoard.commentCount = board.commentCount
                 dynamoBoard.content = board.content
@@ -62,7 +62,7 @@ class WebRestController {
                 }
 
             } else {
-                val dynamoBoard = DynamoDeletedBoard()
+                val dynamoBoard = DeletedBoard()
                 dynamoBoard.id = UUID.randomUUID().toString()
                 dynamoBoard.content = board.content
                 dynamoBoard.commentCount = board.commentCount
@@ -100,7 +100,7 @@ class WebRestController {
 
     @GetMapping("/migration/pushTest")
     fun pushData(): String {
-        val bbb = DynamoBoard()
+        val bbb = Board()
         bbb.content = "adsfasdf"
         val ccc = dynamoBoardRepository.save(bbb)
         return if(ccc != null) {
