@@ -57,7 +57,7 @@ class MailSendUtil {
             }
             val socketAddress = InetSocketAddress(it, 25)
             val socket = Socket()
-            socket.soTimeout = 5000
+            socket.soTimeout = 10000
             try {
                 socket.connect(socketAddress, 5000)
             } catch (e: Exception) {

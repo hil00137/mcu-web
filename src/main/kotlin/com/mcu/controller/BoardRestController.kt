@@ -97,6 +97,7 @@ class BoardRestController {
         return if (board.userId == requestId ||
                 SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
             boardService.deleteBoard(board)
+            boardArchiveService.deleteAll(board.id?:"")
             historyService.writeHistory("delete board id : $id from $requestId", History.USER_REQUEST)
             "삭제하였습니다."
         } else {

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Service
 class BoardService {
@@ -22,7 +23,7 @@ class BoardService {
     }
 
     @Autowired
-    lateinit var dynamoBoardRepository: BoardRepository
+    lateinit var boardRepository: BoardRepository
 
     @Autowired
     lateinit var historyService: HistoryService
@@ -32,7 +33,7 @@ class BoardService {
     /**
      * 해당 게시판의 게시글 개수
      */
-    fun getCountOfBoard(type : BoardType) = dynamoBoardRepository.countByType(type.type)
+    fun getCountOfBoard(type : BoardType) = boardRepository.countByType(type.type)
 
     /**
      * 해당 게시판의 해당 페이지 게시글
@@ -42,7 +43,7 @@ class BoardService {
         var resultPage : QueryResultPage<Board>? = null
         for (i in 0 .. page) {
             val last = resultPage?.lastEvaluatedKey?:HashMap<String, AttributeValue>()
-            resultPage = dynamoBoardRepository.findAllByType(type.type, last)
+            resultPage = boardRepository.findAllByType(type.type, last)
         }
 
         val list = resultPage?.results
@@ -71,14 +72,14 @@ class BoardService {
             logger.warn("Script Injection occurred by ${board.userId}")
             board.content = StringUtil.removeLabel(board.content)
         }
-        return dynamoBoardRepository.save(board)
+        return boardRepository.save(board)
     }
 
     /**
      * id로 검색하기
      */
     fun getBoardById(id: String) : Board? {
-        return dynamoBoardRepository.findById(id)
+        return boardRepository.findById(id)
     }
 
     /**
@@ -87,14 +88,15 @@ class BoardService {
     fun deleteBoard(board: Board) {
         val deletedBoard = DeletedBoard(board)
         deletedBoard.deleteDate = LocalDateTime.now()
-        dynamoBoardRepository.delete(board)
-        dynamoBoardRepository.saveBackupTable(deletedBoard)
+        deletedBoard.expire = LocalDateTime.now().plusDays(180).toEpochSecond(OffsetDateTime.now().offset)
+        boardRepository.delete(board)
+        boardRepository.saveBackupTable(deletedBoard)
     }
 
     @Cacheable(value = ["hitCache"], key = "#userId + ':' + #board.id")
     fun hitCount(board: Board, userId : String) {
         board.hit++
-        dynamoBoardRepository.save(board)
+        boardRepository.save(board)
     }
 
     /**
@@ -102,6 +104,6 @@ class BoardService {
      */
     fun commentCount(board: Board, num: Int) {
         board.commentCount += num
-        dynamoBoardRepository.save(board)
+        boardRepository.save(board)
     }
 }

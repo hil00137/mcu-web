@@ -33,12 +33,14 @@ class BoardRepository {
         return awsConnector.getDynamoDBMapper().load(item)
     }
 
+    @Cacheable(value = ["boardCache"], key = "'typeCount:'+#type")
     fun countByType(type : String): Int {
         val queryExpression = DynamoDBQueryExpression<Board>()
         queryExpression.withIndexName("Board-type-regist").withConsistentRead(false).withHashKeyValues(Board().also { it.type = type })
         return awsConnector.getDynamoDBMapper().count(Board::class.java,queryExpression)
     }
 
+    @Cacheable(value = ["boardCache"], key = "'id:'+#id")
     fun findById(id : String) : Board? {
         return try {
             awsConnector.getDynamoDBMapper().load(Board().also { it.id = id })

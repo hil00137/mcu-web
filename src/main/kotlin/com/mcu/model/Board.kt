@@ -69,6 +69,8 @@ class DeletedBoard() {
     var hit : Int = 0                                   // 조회수
     @DynamoDBAttribute
     var commentCount : Int = 0
+    @DynamoDBAttribute
+    var expire : Long? = null
 }
 
 /**
