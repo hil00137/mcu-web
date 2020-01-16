@@ -1,11 +1,12 @@
-package com.mcu.model
+package com.mcu.model.deprecated
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
+@Deprecated("migration complete")
 @Document
-class BoardArchive {
+class MongoBoardArchive {
     @Id
     lateinit var id : String
     lateinit var boardId : String

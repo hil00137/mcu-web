@@ -1,8 +1,8 @@
 package com.mcu.controller
 
 import com.mcu.model.DynamoBoardArchive
-import com.mcu.repository.BoardArchiveRepository
 import com.mcu.repository.DynamoBoardArchiveRepository
+import com.mcu.repository.deprecated.MongoBoardArchiveRepository
 import com.mcu.service.McuServerManagementService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,7 +15,7 @@ class WebRestController {
     lateinit var mcuServerManagementService : McuServerManagementService
 
     @Autowired
-    lateinit var archiveRepository: BoardArchiveRepository
+    lateinit var archiveRepository: MongoBoardArchiveRepository
 
     @Autowired
     lateinit var dynamoBoardArchiveRepository: DynamoBoardArchiveRepository
