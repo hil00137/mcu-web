@@ -7,7 +7,6 @@ import org.springframework.cache.annotation.EnableCaching
 @EnableCaching
 @SpringBootApplication(scanBasePackages = ["com.mcu.*"])
 class WebApplication
-
 fun main(args: Array<String>) {
     runApplication<WebApplication>(*args)
 }

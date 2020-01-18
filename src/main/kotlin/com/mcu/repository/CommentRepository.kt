@@ -2,7 +2,6 @@ package com.mcu.repository
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList
-import com.amazonaws.services.dynamodbv2.datamodeling.QueryResultPage
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.mcu.model.Comment
 import com.mcu.model.DeletedComment
@@ -43,7 +42,7 @@ class CommentRepository {
     }
 
     @Cacheable(value = ["commentCache"])
-    fun findByBoardIdWithPage(boardId: String, last : MutableMap<String, AttributeValue>) : QueryResultPage<Comment>? {
+    fun findByBoardIdWithPage(boardId: String, last : MutableMap<String, AttributeValue>) : McuQueryResultPage<Comment>? {
         val queryExpression = DynamoDBQueryExpression<Comment>()
         queryExpression.withIndexName("Comment-boardId-regist").withConsistentRead(false).withHashKeyValues(Comment().also { it.boardId = boardId })
                 .withLimit(10).withScanIndexForward(false)

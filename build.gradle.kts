@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.mcu"
-version = "0.4.9-RELEASE"
+version = "0.5.0-RELEASE"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -37,7 +37,6 @@ dependencies {
     implementation("net.sf.ehcache:ehcache:2.9.0")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework:springloaded:1.2.8.RELEASE")

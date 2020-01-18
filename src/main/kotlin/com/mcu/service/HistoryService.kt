@@ -1,7 +1,7 @@
 package com.mcu.service
 
-import com.mcu.model.DynamoHistory
-import com.mcu.repository.DynamoHistoryRepository
+import com.mcu.model.History
+import com.mcu.repository.HistoryRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -13,12 +13,12 @@ import java.time.LocalDateTime
 class HistoryService {
 
     @Autowired
-    private lateinit var dynamoHistoryRepository : DynamoHistoryRepository
+    private lateinit var historyRepository : HistoryRepository
     /**
      * @param priority -> History Priority
      */
     fun writeHistory(message: String, priority : String) {
-        val history = DynamoHistory()
+        val history = History()
         val userId  = SecurityContextHolder.getContext().authentication.principal as String
         history.userId = userId
         val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
@@ -30,16 +30,16 @@ class HistoryService {
         history.date = LocalDateTime.now()
         history.detail = message
         history.priority = priority
-        dynamoHistoryRepository.save(history)
+        historyRepository.save(history)
     }
 
     fun writeHistoryAsSystem(message: String) {
-        val history = DynamoHistory()
+        val history = History()
         history.userId = "admin"
         history.ip = "127.0.0.1"
         history.date = LocalDateTime.now()
         history.detail = message
-        history.priority = DynamoHistory.SYSTEM
-        dynamoHistoryRepository.save(history)
+        history.priority = History.SYSTEM
+        historyRepository.save(history)
     }
 }

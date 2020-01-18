@@ -2,7 +2,7 @@ package com.mcu.controller
 
 import com.mcu.model.Board
 import com.mcu.model.Comment
-import com.mcu.model.DynamoHistory
+import com.mcu.model.History
 import com.mcu.service.BoardService
 import com.mcu.service.CommentService
 import com.mcu.service.HistoryService
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/comment")
@@ -38,10 +39,11 @@ class CommentController {
             boardService.getBoardById(it)
         }
         if (board == null) {
-            historyService.writeHistory("Access is not allowed.[save board] from $userId", DynamoHistory.RULE_OVER)
+            historyService.writeHistory("Access is not allowed.[save board] from $userId", History.RULE_OVER)
             return "잘못된 접근입니다."
         }
         comment.userId = userId
+        comment.regist = LocalDateTime.now()
         boardService.commentCount(board, 1)
         commentService.saveComment(comment)
         return "success"
@@ -84,10 +86,10 @@ class CommentController {
         return if (comment.userId == requestId ||
                 SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
             commentService.deleteComment(comment)
-            boardService.commentCount(boardService.getBoardById(comment.boardId)!!, -1)
+            boardService.commentCount(boardService.getBoardById(comment.boardId!!)!!, -1)
             "success"
         } else {
-            historyService.writeHistory("Access is not allowed.[delete comment] from $requestId", DynamoHistory.RULE_OVER)
+            historyService.writeHistory("Access is not allowed.[delete comment] from $requestId", History.RULE_OVER)
             "권한이 없습니다."
         }
     }
