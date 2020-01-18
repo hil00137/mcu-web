@@ -37,6 +37,8 @@ class HashUtil {
             c.init(Cipher.ENCRYPT_MODE, keySpec, IvParameterSpec(iv!!.toByteArray()))
             val encrypted = c.doFinal(str.toByteArray(Charsets.UTF_8))
             return base64Encoder!!.encodeToString(encrypted).toString()
+                    .replace("/","%2F")
+                    .replace("+","%2B")
         }
 
         fun decrpytAES256(str: String): String {
@@ -46,7 +48,9 @@ class HashUtil {
             val c = Cipher.getInstance("AES/CBC/PKCS5Padding")
             c.init(Cipher.DECRYPT_MODE, keySpec, IvParameterSpec(iv!!.toByteArray()))
             val byteStr = try {
-                base64Decorder!!.decode(str)
+                base64Decorder!!.decode(str
+                        .replace("%2F","/")
+                        .replace("%2B","+"))
             } catch (exception : Exception) {
                 "".toByteArray(Charsets.UTF_8)
             }

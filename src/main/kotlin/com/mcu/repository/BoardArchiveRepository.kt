@@ -1,29 +1,29 @@
 package com.mcu.repository
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
+import com.mcu.model.BoardArchive
 import com.mcu.model.DeletedBoardArchive
-import com.mcu.model.DynamoBoardArchive
 import com.mcu.util.AwsConnector
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-class DynamoBoardArchiveRepository {
+class BoardArchiveRepository {
 
     @Autowired
     lateinit var awsConnector: AwsConnector
 
-    fun findAllByBoardId(boardId : String) : List<DynamoBoardArchive> {
-        val queryExpression = DynamoDBQueryExpression<DynamoBoardArchive>()
-                .withIndexName("BoardArchive-boardId-modify").withConsistentRead(false).withHashKeyValues(DynamoBoardArchive().also { it.boardId = boardId })
-        return awsConnector.getDynamoDBMapper().query(DynamoBoardArchive::class.java, queryExpression)
+    fun findAllByBoardId(boardId : String) : List<BoardArchive> {
+        val queryExpression = DynamoDBQueryExpression<BoardArchive>()
+                .withIndexName("BoardArchive-boardId-modify").withConsistentRead(false).withHashKeyValues(BoardArchive().also { it.boardId = boardId })
+        return awsConnector.getDynamoDBMapper().query(BoardArchive::class.java, queryExpression)
     }
 
-    fun save(boardArchive: DynamoBoardArchive) {
+    fun save(boardArchive: BoardArchive) {
         awsConnector.getDynamoDBMapper().save(boardArchive)
     }
 
-    fun delete(item : DynamoBoardArchive) {
+    fun delete(item : BoardArchive) {
         awsConnector.getDynamoDBMapper().delete(item)
     }
 

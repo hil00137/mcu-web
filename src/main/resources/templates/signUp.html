@@ -204,6 +204,7 @@
                     this.submitMessage = "";
                 },
                 submit : function() {
+                    this.submitMessage = "";
                     if(!idChecked || !pwdChecked || !pwd2Checked || !nicknameChecked || !emailChecked) {
                         this.submitMessage = "입력되지 않은 항목이 있습니다.";
                         return false;

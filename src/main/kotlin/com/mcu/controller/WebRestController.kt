@@ -1,7 +1,7 @@
 package com.mcu.controller
 
-import com.mcu.model.DynamoBoardArchive
-import com.mcu.repository.DynamoBoardArchiveRepository
+import com.mcu.model.BoardArchive
+import com.mcu.repository.BoardArchiveRepository
 import com.mcu.repository.deprecated.MongoBoardArchiveRepository
 import com.mcu.service.McuServerManagementService
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,13 +18,13 @@ class WebRestController {
     lateinit var archiveRepository: MongoBoardArchiveRepository
 
     @Autowired
-    lateinit var dynamoBoardArchiveRepository: DynamoBoardArchiveRepository
+    lateinit var dynamoBoardArchiveRepository: BoardArchiveRepository
 
     @GetMapping("/migration/boardArchive")
     fun moveUserData(): String {
         val list = archiveRepository.findAll()
         for (boardArchive in list) {
-            val dynamoBoardArchive  = DynamoBoardArchive()
+            val dynamoBoardArchive  = BoardArchive()
             dynamoBoardArchive.boardId = boardArchive.boardId
             dynamoBoardArchive.oriSubject = boardArchive.oriSubject
             dynamoBoardArchive.oriContent = boardArchive.oriContent

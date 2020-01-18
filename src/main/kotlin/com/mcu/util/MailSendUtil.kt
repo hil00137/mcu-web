@@ -135,10 +135,11 @@ class MailSendUtil {
             }
             MailSendStep.DATA_BODY -> {
                 mail.makeHeader()
-                writer.println(mail.header)
-                writer.println("")
+                writer.println(mail.header+"\r\n")
                 writer.println(mail.content)
-                writer.println(".")
+                writer.print("\r\n.\r\n")
+                writer.flush()
+                println(mail.content)
                 result = reader.readLine()?:""
             }
             MailSendStep.QUIT -> {

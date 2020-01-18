@@ -1,9 +1,9 @@
 package com.mcu.service
 
 import com.mcu.model.Board
+import com.mcu.model.BoardArchive
 import com.mcu.model.DeletedBoardArchive
-import com.mcu.model.DynamoBoardArchive
-import com.mcu.repository.DynamoBoardArchiveRepository
+import com.mcu.repository.BoardArchiveRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -13,10 +13,10 @@ import java.time.OffsetDateTime
 class BoardArchiveService {
 
     @Autowired
-    private lateinit var boardArchiveRepository: DynamoBoardArchiveRepository
+    private lateinit var boardArchiveRepository: BoardArchiveRepository
 
     fun archiving(oriBoard : Board, newBoard : Board) {
-        val boardArchive = DynamoBoardArchive()
+        val boardArchive = BoardArchive()
         boardArchive.boardId = oriBoard.id?:""
         boardArchive.oriSubject = oriBoard.subject
         boardArchive.oriContent = oriBoard.content
