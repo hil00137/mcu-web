@@ -50,7 +50,7 @@ class BoardRepository {
     }
 
     @Cacheable(value = ["boardCache"])
-    fun findAllByType(type: String, last : MutableMap<String, AttributeValue>): QueryResultPage<Board>? {
+    fun findByTypeWithPage(type: String, last : MutableMap<String, AttributeValue>): QueryResultPage<Board>? {
         val queryExpression = DynamoDBQueryExpression<Board>()
         queryExpression.withIndexName("Board-type-regist").withConsistentRead(false).withHashKeyValues(Board().also { it.type = type })
                 .withLimit(10).withScanIndexForward(false)

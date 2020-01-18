@@ -1,12 +1,13 @@
-package com.mcu.model
+package com.mcu.model.deprecated
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.io.Serializable
 import java.time.LocalDateTime
 
+@Deprecated("migration complete")
 @Document
-class Comment : Serializable {
+class MongoComment : Serializable {
     @Id
     lateinit var id : String
     lateinit var userId : String

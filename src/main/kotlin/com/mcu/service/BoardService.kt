@@ -43,7 +43,7 @@ class BoardService {
         var resultPage : QueryResultPage<Board>? = null
         for (i in 0 .. page) {
             val last = resultPage?.lastEvaluatedKey?:HashMap<String, AttributeValue>()
-            resultPage = boardRepository.findAllByType(type.type, last)
+            resultPage = boardRepository.findByTypeWithPage(type.type, last)
         }
 
         val list = resultPage?.results

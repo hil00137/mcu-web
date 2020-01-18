@@ -1,61 +1,70 @@
 package com.mcu.service
 
-import com.mcu.model.Comment
-import com.mcu.repository.CommentRepository
+import com.amazonaws.services.dynamodbv2.datamodeling.QueryResultPage
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.mcu.model.DeletedComment
+import com.mcu.model.DynamoComment
+import com.mcu.repository.DynamoCommentRepository
 import com.mcu.util.DateUtil
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Service
 class CommentService {
 
     @Autowired
-    lateinit var commentRepository: CommentRepository
+    lateinit var dynamoCommentRepository: DynamoCommentRepository
 
     @Autowired
     lateinit var userService : UserService
 
     /**
-     * 해당 게시글의 댓글 갯수
-     */
-    fun getCountOfComment(boardId : String) = commentRepository.countByBoardIdAndDelete(boardId, false)
-
-    /**
      * 해당 게시글의 댓글 가져오기
      */
-    fun getComments(boardId: String, page : Int): List<Comment> {
-        val list = commentRepository.findAllByBoardIdAndDelete(boardId, false, PageRequest.of(page, 5, Sort.by("id").descending()))
-        list.forEach {
+    @Cacheable(value = ["commentCache"])
+    fun getComments(boardId: String, page : Int): MutableList<DynamoComment> {
+        var resultPage : QueryResultPage<DynamoComment>? = null
+        for (i in 0 .. page) {
+            val last = resultPage?.lastEvaluatedKey?:HashMap<String, AttributeValue>()
+            resultPage = dynamoCommentRepository.findByBoardIdWithPage(boardId, last)
+        }
+
+        val list = resultPage?.results
+        list?.forEach {
             it.userId.let { userId -> it.nickname = userService.getUserByUserId(userId)?.nickname?:"" }
             it.regist?.let { regist -> it.formattedRegist = DateUtil.transform(regist)  }
         }
-        return list
+        return list?: ArrayList()
     }
 
-    fun saveComment(comment: Comment) =
-            commentRepository.save(comment)
+    fun saveComment(comment: DynamoComment) =
+            dynamoCommentRepository.save(comment)
 
     /**
      * 댓글 삭제 처리
      */
-    fun deleteComment(comment: Comment) {
-        comment.delete = true
-        comment.deleteDate = LocalDateTime.now()
-        commentRepository.save(comment)
+    fun deleteComment(comment: DynamoComment) {
+        val deleteComment = DeletedComment(comment)
+        deleteComment.deleteDate = LocalDateTime.now()
+        deleteComment.expire = LocalDateTime.now().plusDays(180).toEpochSecond(OffsetDateTime.now().offset)
+        dynamoCommentRepository.saveBackupTable(deleteComment)
+        dynamoCommentRepository.delete(comment)
+    }
+
+    fun deleteAll(boardId: String) {
+        val list = dynamoCommentRepository.findAllByBoardId(boardId)
+        list?.forEach {
+            this.deleteComment(it)
+        }
     }
 
     /**
      * id로 검색하기
      */
-    fun getCommentById(id: String) : Comment? {
-        val result = commentRepository.findById(id)
-        return if(result.isPresent) {
-            result.get()
-        } else {
-            null
-        }
+    fun getCommentById(id: String) : DynamoComment? {
+        return dynamoCommentRepository.findById(id)
     }
 }

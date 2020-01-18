@@ -1,14 +1,13 @@
 package com.mcu.controller
 
 import com.mcu.model.Board
-import com.mcu.model.Comment
+import com.mcu.model.DynamoComment
 import com.mcu.model.History
 import com.mcu.service.BoardService
 import com.mcu.service.CommentService
 import com.mcu.service.HistoryService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
@@ -32,7 +31,7 @@ class CommentController {
      * 댓글 저장
      */
     @PostMapping("")
-    fun saveComment(@RequestBody comment : Comment) : String {
+    fun saveComment(@RequestBody comment : DynamoComment) : String {
         val userId = SecurityContextHolder.getContext().authentication.principal as String
         val boardId: String? = comment.boardId
         val board: Board? = boardId?.let {
@@ -51,7 +50,6 @@ class CommentController {
     /**
      * 댓글들 가져오기
      */
-    @Cacheable(value = ["commentCache"])
     @GetMapping("/{boardId}/{page}")
     fun getComments(@PathVariable boardId: String, @PathVariable page: String) : Map<String, Any> {
         logger.info("Get comments id: $boardId, page : $page")

@@ -5,6 +5,7 @@ import com.mcu.model.BoardType
 import com.mcu.model.History
 import com.mcu.service.BoardArchiveService
 import com.mcu.service.BoardService
+import com.mcu.service.CommentService
 import com.mcu.service.HistoryService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +28,9 @@ class BoardRestController {
 
     @Autowired
     lateinit var boardArchiveService: BoardArchiveService
+
+    @Autowired
+    lateinit var commentService : CommentService
 
     /**
      * 정해진 게시판의 page별로 게시글들을 가져옴. Caching
@@ -98,6 +102,7 @@ class BoardRestController {
                 SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
             boardService.deleteBoard(board)
             boardArchiveService.deleteAll(board.id?:"")
+            commentService.deleteAll(board.id?:"")
             historyService.writeHistory("delete board id : $id from $requestId", History.USER_REQUEST)
             "삭제하였습니다."
         } else {
