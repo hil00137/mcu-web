@@ -2,7 +2,7 @@ package com.mcu.controller
 
 import com.mcu.model.Board
 import com.mcu.model.BoardType
-import com.mcu.model.History
+import com.mcu.model.DynamoHistory
 import com.mcu.service.BoardArchiveService
 import com.mcu.service.BoardService
 import com.mcu.service.CommentService
@@ -77,7 +77,7 @@ class BoardRestController {
             val list = SecurityContextHolder.getContext().authentication.authorities
             if(!list.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
                 result["message"]="잘못된 접근입니다."
-                historyService.writeHistory("Access is not allowed.[save board] from $userId", History.RULE_OVER)
+                historyService.writeHistory("Access is not allowed.[save board] from $userId", DynamoHistory.RULE_OVER)
                 return result;
             }
         }
@@ -103,10 +103,10 @@ class BoardRestController {
             boardService.deleteBoard(board)
             boardArchiveService.deleteAll(board.id?:"")
             commentService.deleteAll(board.id?:"")
-            historyService.writeHistory("delete board id : $id from $requestId", History.USER_REQUEST)
+            historyService.writeHistory("delete board id : $id from $requestId", DynamoHistory.USER_REQUEST)
             "삭제하였습니다."
         } else {
-            historyService.writeHistory("Access is not allowed.[delete board] from $requestId", History.RULE_OVER)
+            historyService.writeHistory("Access is not allowed.[delete board] from $requestId", DynamoHistory.RULE_OVER)
             "권한이 없습니다."
         }
     }
@@ -122,10 +122,10 @@ class BoardRestController {
         val requestId = SecurityContextHolder.getContext().authentication.principal as String
         val oriBoard = boardService.getBoardById(newBoard.id!!)
         if(oriBoard == null) {
-            historyService.writeHistory("Access is not allowed.[modify board] from $requestId", History.RULE_OVER)
+            historyService.writeHistory("Access is not allowed.[modify board] from $requestId", DynamoHistory.RULE_OVER)
             return "잘못된 접근입니다."
         } else if(oriBoard.userId != requestId) {
-            historyService.writeHistory("Access is not allowed.[modify board] from $requestId", History.RULE_OVER)
+            historyService.writeHistory("Access is not allowed.[modify board] from $requestId", DynamoHistory.RULE_OVER)
             return "잘못된 접근입니다."
         }
         boardArchiveService.archiving(oriBoard, newBoard)

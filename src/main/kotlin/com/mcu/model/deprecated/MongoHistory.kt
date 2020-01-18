@@ -1,10 +1,11 @@
-package com.mcu.model
+package com.mcu.model.deprecated
 
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
+@Deprecated("migration complete")
 @Document
-class History {
+class MongoHistory {
     var priority : Int = 0              // 히스토리 타입 혹은 중요도
     var userId : String = "admin"       // 기본값으로 admin
     var ip : String = ""                // 해당 히스토리 발생 ip

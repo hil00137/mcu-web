@@ -1,6 +1,6 @@
 package com.mcu.controller
 
-import com.mcu.model.History
+import com.mcu.model.DynamoHistory
 import com.mcu.model.User
 import com.mcu.service.HistoryService
 import com.mcu.service.UserService
@@ -45,7 +45,7 @@ class UserController {
         user?.let {
             userService.registerUser(it)?:"saved error"
         }?: return "error"
-        historyService.writeHistory("Sign Up ${user.userId}",History.SYSTEM)
+        historyService.writeHistory("Sign Up ${user.userId}",DynamoHistory.SYSTEM)
         return "OK"
     }
 

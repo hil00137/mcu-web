@@ -2,13 +2,11 @@ package com.mcu.configuration
 
 import com.mongodb.*
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.*
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 
 
-@Configuration
-@EnableMongoRepositories(basePackages = ["com.mcu.repository"], mongoTemplateRef = "mongoTemplate", includeFilters = [ComponentScan.Filter(type = FilterType.REGEX, pattern = [".*ServerRepository"])])
+//@Configuration
+//@EnableMongoRepositories(basePackages = ["com.mcu.repository"], mongoTemplateRef = "mongoTemplate", includeFilters = [ComponentScan.Filter(type = FilterType.REGEX, pattern = [".*ServerRepository"])])
 class MongoConfig {
 
     @Value("\${spring.data.mongodb.host}")
@@ -26,14 +24,14 @@ class MongoConfig {
     /**
      * Required username, password, mechanism
      */
-    @Bean
+//    @Bean
     fun mongoClient() : MongoClient {
         val credential = MongoCredential.createCredential(username, databaseName, password.toCharArray()).withMechanism(AuthenticationMechanism.SCRAM_SHA_1)
         val options = MongoClientOptions.builder().connectionsPerHost(30).minConnectionsPerHost(10).build()
         return MongoClient(ServerAddress(host,27017), credential,options)
     }
 
-    @Primary
-    @Bean
+//    @Primary
+//    @Bean
     fun mongoTemplate() = MongoTemplate(mongoClient(), databaseName)
 }

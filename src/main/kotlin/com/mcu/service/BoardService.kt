@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.mcu.model.Board
 import com.mcu.model.BoardType
 import com.mcu.model.DeletedBoard
-import com.mcu.model.History
+import com.mcu.model.DynamoHistory
 import com.mcu.repository.BoardRepository
 import com.mcu.util.DateUtil
 import com.mcu.util.StringUtil
@@ -64,7 +64,7 @@ class BoardService {
         if (StringUtil.isScriptInjection(board.subject)) {
             logger.warn("Script Injection occurred by ${board.userId}")
             board.subject = StringUtil.removeLabel(board.subject)
-            historyService.writeHistory("Script Injection", History.RULE_OVER)
+            historyService.writeHistory("Script Injection", DynamoHistory.RULE_OVER)
         }
         
         board.content = StringUtil.checkScriptInjection(board.content)
