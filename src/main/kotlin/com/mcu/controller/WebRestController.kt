@@ -1,8 +1,8 @@
 package com.mcu.controller
 
+import com.mcu.model.Comment
 import com.mcu.model.DeletedComment
-import com.mcu.model.DynamoComment
-import com.mcu.repository.DynamoCommentRepository
+import com.mcu.repository.CommentRepository
 import com.mcu.repository.deprecated.MongoCommentRepository
 import com.mcu.service.McuServerManagementService
 import org.slf4j.LoggerFactory
@@ -27,7 +27,7 @@ class WebRestController {
     lateinit var commentRepository: MongoCommentRepository
 
     @Autowired
-    lateinit var dynamoCommentRepository: DynamoCommentRepository
+    lateinit var dynamoCommentRepository: CommentRepository
 
     @GetMapping("/migration/comment")
     fun moveUserData(): String {
@@ -46,7 +46,7 @@ class WebRestController {
                 deletedComment.expire = LocalDateTime.now().plusDays(180).toEpochSecond(OffsetDateTime.now().offset)
                 dynamoCommentRepository.saveBackupTable(deletedComment)
             } else {
-                val dynamoComment  = DynamoComment()
+                val dynamoComment  = Comment()
                 dynamoComment.content = comment.content
                 dynamoComment.boardId = comment.boardId
                 dynamoComment.userId = comment.userId

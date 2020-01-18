@@ -1,7 +1,7 @@
 package com.mcu.controller
 
 import com.mcu.model.Board
-import com.mcu.model.DynamoComment
+import com.mcu.model.Comment
 import com.mcu.model.History
 import com.mcu.service.BoardService
 import com.mcu.service.CommentService
@@ -31,7 +31,7 @@ class CommentController {
      * 댓글 저장
      */
     @PostMapping("")
-    fun saveComment(@RequestBody comment : DynamoComment) : String {
+    fun saveComment(@RequestBody comment : Comment) : String {
         val userId = SecurityContextHolder.getContext().authentication.principal as String
         val boardId: String? = comment.boardId
         val board: Board? = boardId?.let {
