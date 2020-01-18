@@ -5,6 +5,7 @@ import com.mcu.model.User
 import com.mcu.service.HistoryService
 import com.mcu.service.UserService
 import com.mcu.util.HashUtil
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -13,6 +14,10 @@ import javax.servlet.http.HttpServletRequest
 @Controller
 @RequestMapping("/user")
 class UserController {
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+    }
 
     @Autowired
     lateinit var userService : UserService
@@ -98,6 +103,7 @@ class UserController {
 
         if (user.mailAuth == "wait" && user.mailAuthCode == HashUtil.decrpytAES256(emailAuthCode)) {
             request.setAttribute("errorMessage","이메일이 인증되었습니다.")
+            logger.info("${user.userId} mail authenticate success")
             userService.emailAuthSuccess(user)
         } else {
             request.setAttribute("errorMessage", "인증에 실패하였습니다.")

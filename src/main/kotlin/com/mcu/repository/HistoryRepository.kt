@@ -1,8 +1,17 @@
 package com.mcu.repository
 
 import com.mcu.model.History
-import org.springframework.data.mongodb.repository.MongoRepository
+import com.mcu.util.AwsConnector
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Repository
 
-interface HistoryRepository : MongoRepository<History, String> {
+@Repository
+class HistoryRepository {
 
+    @Autowired
+    private lateinit var awsConnector : AwsConnector
+    fun save(item: History): History? {
+        awsConnector.getDynamoDBMapper().save(item)
+        return awsConnector.getDynamoDBMapper().load(item)
+    }
 }

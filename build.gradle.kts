@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.mcu"
-version = "0.4.3-RELEASE"
+version = "0.5.0-RELEASE"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -28,6 +28,7 @@ dependencies {
     implementation("com.sun.mail:javax.mail:1.6.2")
     implementation("org.apache.commons:commons-lang3:3.9")
     implementation("com.amazonaws:aws-java-sdk-ec2:1.11.675")
+    implementation("com.amazonaws:aws-java-sdk-dynamodb:1.11.705")
     implementation("org.springframework:spring-aop")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
@@ -36,7 +37,6 @@ dependencies {
     implementation("net.sf.ehcache:ehcache:2.9.0")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework:springloaded:1.2.8.RELEASE")

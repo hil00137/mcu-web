@@ -13,12 +13,11 @@ import java.time.LocalDateTime
 class HistoryService {
 
     @Autowired
-    private lateinit var historyRepository: HistoryRepository
-
+    private lateinit var historyRepository : HistoryRepository
     /**
      * @param priority -> History Priority
      */
-    fun writeHistory(message: String, priority : Int) {
+    fun writeHistory(message: String, priority : String) {
         val history = History()
         val userId  = SecurityContextHolder.getContext().authentication.principal as String
         history.userId = userId

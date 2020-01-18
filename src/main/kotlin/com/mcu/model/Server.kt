@@ -1,35 +1,57 @@
 package com.mcu.model
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
+import com.amazonaws.services.dynamodbv2.datamodeling.*
+import com.mcu.configuration.DynamoDbConfig
 import java.time.LocalDateTime
 
-@Document(collection = "server")
-class Server {
+@DynamoDBTable(tableName = "Server")
+class Server(@DynamoDBHashKey(attributeName = "name") var name: String = "") {
+    @DynamoDBAttribute(attributeName = "ip")
+    var ip: String = ""
 
-    @Id lateinit var id : String
-    @Field lateinit var name : String
-    @Field lateinit var ip : String
-    @Field lateinit var aws : Aws
-    @Field lateinit var minecraft : Minecraft
+    @DynamoDBAttribute(attributeName = "aws")
+    lateinit var aws: Aws
 
-    @Document(collection = "server.aws")
+    @DynamoDBAttribute(attributeName = "minecraft")
+    lateinit var minecraft : Minecraft
+    @DynamoDBDocument
     class Aws {
-        @Field var awsId : String? = null
-        var online : Boolean = false
-        var start : LocalDateTime? = null
-        var update : LocalDateTime? = null
-        var code : Int = 0
+        @DynamoDBAttribute(attributeName = "awsId")
+        var awsId: String? = null
+        @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.BOOL)
+        @DynamoDBAttribute(attributeName = "online")
+        var online: Boolean = false
+
+        @DynamoDBTypeConverted(converter = DynamoDbConfig.LocalDateTimeConverter::class)
+        @DynamoDBAttribute
+        var start: LocalDateTime? = null
+        @DynamoDBTypeConverted(converter = DynamoDbConfig.LocalDateTimeConverter::class)
+        @DynamoDBAttribute
+        var update: LocalDateTime? = null
+        @DynamoDBAttribute
+        var code: Int = 0
     }
 
-    @Document(collection = "server.minecraft")
+    @DynamoDBDocument
     class Minecraft {
+        @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.BOOL)
+        @DynamoDBAttribute
         var online : Boolean = false
+        @DynamoDBAttribute
         var now : Int = 0
+        @DynamoDBAttribute
         var max : Int = 0
+        @DynamoDBTypeConverted(converter = DynamoDbConfig.LocalDateTimeConverter::class)
+        @DynamoDBAttribute
         var zeroTime : LocalDateTime? = null
+        @DynamoDBTypeConverted(converter = DynamoDbConfig.LocalDateTimeConverter::class)
+        @DynamoDBAttribute
         var update : LocalDateTime? = null
-        @Field var link : String = ""
+        @DynamoDBAttribute
+        var link : String = ""
     }
 }
+
+
+
+

@@ -18,33 +18,34 @@ import java.util.*
 class UserService {
 
     @Autowired
-    private lateinit var userRepository : UserRepository
-
-    @Autowired
     private lateinit var mailSendUtil: MailSendUtil
 
     @Value("\${homepage.address}")
     private lateinit var homepageUrl : String
 
+    @Autowired
+    private lateinit var dynamoUserRepository : UserRepository
+
     @Cacheable(value = ["userCache"], key = "'userId:' + #userId")
-    fun getUserByUserId(userId : String) = userRepository.findUserByUserId(userId)
+    fun getUserByUserId(userId : String) = dynamoUserRepository.findUserByUserId(userId)
     @Cacheable(value = ["userCache"], key = "'nickname:' + #nickname")
-    fun getUserByNickname(nickname : String) = userRepository.findUserByNickname(nickname)
+    fun getUserByNickname(nickname : String) = dynamoUserRepository.findUserByNickname(nickname)
     @Cacheable(value = ["userCache"], key = "'email:' + #email")
-    fun getUserByEmail(email : String) = userRepository.findUserByEmail(email)
+    fun getUserByEmail(email : String) = dynamoUserRepository.findUserByEmail(email)
     @CacheEvict(value = ["userCache"], allEntries = true)
     fun registerUser(user: User): User? {
         user.password = HashUtil.sha512(user.password)
         user.mailAuthCode = UUID.randomUUID().toString().replace("-","").substring(0,9)
         val ip = this.getIp()
-        Thread() {
+        Thread {
             val mail = Mail()
-            mail.toMail = user.email
-            mail.toName = user.nickname
+            mail.toMail = user.email!!
+            mail.toName = user.nickname!!
             mail.subject = "마크대학 이메일 인증메일입니다"
             mail.setEmailAuthContent(ip, homepageUrl, user)
             val resultMap = mailSendUtil.sendEmail(mail)
-            val targetUser = this.getUserByUserId(user.userId)!!
+            val targetUser = this.getUserByUserId(user.userId?:"")?:User()
+
             if(resultMap["result"] == "success") {
                 targetUser.mailAuth = "wait"
             } else if(resultMap["result"] == "fail") {
@@ -52,12 +53,10 @@ class UserService {
                 targetUser.mailAuthCode = null
                 targetUser.mailAuthFailReason = resultMap["message"]
             }
-            userRepository.save(targetUser)
+            dynamoUserRepository.save(targetUser)
         }.start()
-        return userRepository.save(user)
+        return dynamoUserRepository.save(user)
     }
-
-    fun save(user : User) : User? = userRepository.save(user)
 
     fun getIp() : String {
         val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
@@ -71,6 +70,6 @@ class UserService {
     fun emailAuthSuccess(user: User) {
         user.mailAuth = "success"
         user.mailAuthCode = null
-        userRepository.save(user)
+        dynamoUserRepository.save(user)
     }
 }

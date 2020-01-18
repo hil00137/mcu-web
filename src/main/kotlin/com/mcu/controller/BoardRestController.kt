@@ -5,10 +5,10 @@ import com.mcu.model.BoardType
 import com.mcu.model.History
 import com.mcu.service.BoardArchiveService
 import com.mcu.service.BoardService
+import com.mcu.service.CommentService
 import com.mcu.service.HistoryService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
@@ -29,10 +29,12 @@ class BoardRestController {
     @Autowired
     lateinit var boardArchiveService: BoardArchiveService
 
+    @Autowired
+    lateinit var commentService : CommentService
+
     /**
      * 정해진 게시판의 page별로 게시글들을 가져옴. Caching
      */
-    @Cacheable(value = ["boardCache"])
     @GetMapping("/{type}/{page}")
     fun getBoards(@PathVariable type : String, @PathVariable page : String) : Map<String, Any> {
         logger.info("Get Boards type: $type, page : $page")
@@ -82,7 +84,7 @@ class BoardRestController {
         board.userId = userId
         val boardId = boardService.saveBoard(board).id
         result["message"] = "success"
-        result["boardId"] = boardId
+        result["boardId"] = boardId!!
         return result
     }
 
@@ -99,6 +101,8 @@ class BoardRestController {
         return if (board.userId == requestId ||
                 SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
             boardService.deleteBoard(board)
+            boardArchiveService.deleteAll(board.id?:"")
+            commentService.deleteAll(board.id?:"")
             historyService.writeHistory("delete board id : $id from $requestId", History.USER_REQUEST)
             "삭제하였습니다."
         } else {
@@ -116,7 +120,7 @@ class BoardRestController {
             return "잘못된 접근입니다."
         }
         val requestId = SecurityContextHolder.getContext().authentication.principal as String
-        val oriBoard = boardService.getBoardById(newBoard.id)
+        val oriBoard = boardService.getBoardById(newBoard.id!!)
         if(oriBoard == null) {
             historyService.writeHistory("Access is not allowed.[modify board] from $requestId", History.RULE_OVER)
             return "잘못된 접근입니다."

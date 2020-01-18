@@ -57,7 +57,7 @@ class MailSendUtil {
             }
             val socketAddress = InetSocketAddress(it, 25)
             val socket = Socket()
-            socket.soTimeout = 5000
+            socket.soTimeout = 10000
             try {
                 socket.connect(socketAddress, 5000)
             } catch (e: Exception) {
@@ -135,10 +135,11 @@ class MailSendUtil {
             }
             MailSendStep.DATA_BODY -> {
                 mail.makeHeader()
-                writer.println(mail.header)
-                writer.println("")
+                writer.println(mail.header+"\r\n")
                 writer.println(mail.content)
-                writer.println(".")
+                writer.print("\r\n.\r\n")
+                writer.flush()
+                println(mail.content)
                 result = reader.readLine()?:""
             }
             MailSendStep.QUIT -> {

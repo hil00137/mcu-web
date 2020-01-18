@@ -8,10 +8,10 @@ import com.mcu.service.CommentService
 import com.mcu.service.HistoryService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/comment")
@@ -43,6 +43,7 @@ class CommentController {
             return "잘못된 접근입니다."
         }
         comment.userId = userId
+        comment.regist = LocalDateTime.now()
         boardService.commentCount(board, 1)
         commentService.saveComment(comment)
         return "success"
@@ -51,7 +52,6 @@ class CommentController {
     /**
      * 댓글들 가져오기
      */
-    @Cacheable(value = ["commentCache"])
     @GetMapping("/{boardId}/{page}")
     fun getComments(@PathVariable boardId: String, @PathVariable page: String) : Map<String, Any> {
         logger.info("Get comments id: $boardId, page : $page")
@@ -86,7 +86,7 @@ class CommentController {
         return if (comment.userId == requestId ||
                 SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
             commentService.deleteComment(comment)
-            boardService.commentCount(boardService.getBoardById(comment.boardId)!!, -1)
+            boardService.commentCount(boardService.getBoardById(comment.boardId!!)!!, -1)
             "success"
         } else {
             historyService.writeHistory("Access is not allowed.[delete comment] from $requestId", History.RULE_OVER)

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.DataOutputStream
-import java.lang.Exception
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.time.LocalDateTime

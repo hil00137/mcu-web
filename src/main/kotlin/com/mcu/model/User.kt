@@ -1,23 +1,32 @@
 package com.mcu.model
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
+import com.amazonaws.services.dynamodbv2.datamodeling.*
+import com.mcu.configuration.DynamoDbConfig
 import java.io.Serializable
 import java.time.LocalDateTime
 
-@Document(collection = "user")
-class User : Serializable {
-    @Id
-    lateinit var id : String
-    var userId : String = ""
-    var password : String = ""
-    var auth : String = "common"
-    var regDate : LocalDateTime? = LocalDateTime.now()
-    var email : String = ""
-    var nickname : String = ""
-    var mailAuth : String = "none"
-    var mailAuthCode : String? = null
-    var mailAuthFailReason : String? = null
+@DynamoDBTable(tableName = "User")
+class User(@DynamoDBHashKey(attributeName = "userId") var userId: String? = "") : Serializable {
 
-    override fun toString() = "userId : $userId, email: $email, nickname: $nickname, auth: $auth"
+    @DynamoDBAttribute(attributeName = "password")
+    var password : String = ""
+
+    @DynamoDBAttribute(attributeName = "auth")
+    var auth : String = "common"
+
+    @DynamoDBTypeConverted(converter = DynamoDbConfig.LocalDateTimeConverter::class)
+    @DynamoDBAttribute(attributeName = "regDate")
+    var regDate : LocalDateTime? = LocalDateTime.now()
+
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "User-email",attributeName = "email")
+    var email : String? = null
+
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "User-nickname", attributeName = "nickname")
+    var nickname : String? = null
+    @DynamoDBAttribute(attributeName = "mailAuth")
+    var mailAuth : String = "none"
+    @DynamoDBAttribute(attributeName = "mailAuthCode")
+    var mailAuthCode : String? = null
+    @DynamoDBAttribute(attributeName = "mailAuthFailReason")
+    var mailAuthFailReason : String? = null
 }
