@@ -2,7 +2,7 @@ package com.mcu.controller
 
 import com.mcu.model.Board
 import com.mcu.model.Comment
-import com.mcu.model.History
+import com.mcu.model.HistoryPriority
 import com.mcu.service.BoardService
 import com.mcu.service.CommentService
 import com.mcu.service.HistoryService
@@ -39,7 +39,7 @@ class CommentController {
             boardService.getBoardById(it)
         }
         if (board == null) {
-            historyService.writeHistory("Access is not allowed.[save board] from $userId", History.RULE_OVER)
+            historyService.writeHistory("Access is not allowed.[save board] from $userId", HistoryPriority.RULE_OVER.name)
             return "잘못된 접근입니다."
         }
         comment.userId = userId
@@ -89,7 +89,7 @@ class CommentController {
             boardService.commentCount(boardService.getBoardById(comment.boardId!!)!!, -1)
             "success"
         } else {
-            historyService.writeHistory("Access is not allowed.[delete comment] from $requestId", History.RULE_OVER)
+            historyService.writeHistory("Access is not allowed.[delete comment] from $requestId", HistoryPriority.RULE_OVER.name)
             "권한이 없습니다."
         }
     }
