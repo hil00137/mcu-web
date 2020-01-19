@@ -16,5 +16,13 @@ class DateUtil {
             }
             return dateTime.toLocalDate().format(DateTimeFormatter.ofPattern("yy.MM.dd"))
         }
+
+        fun transMailFormYmdh(dateTime: LocalDateTime) : String {
+            return dateTime.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시"))
+        }
+
+        fun transMailFormHms(dateTime: LocalDateTime) : String {
+            return dateTime.format(DateTimeFormatter.ofPattern("HH시 mm분 ss초"))
+        }
     }
 }
