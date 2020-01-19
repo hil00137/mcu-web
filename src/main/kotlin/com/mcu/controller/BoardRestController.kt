@@ -73,7 +73,7 @@ class BoardRestController {
         if(board == null) {
             result["message"]="잘못된 접근입니다."
             return result;
-        } else if (boardType == BoardType.NOTIFICATION) {
+        } else if (boardType == BoardType.NOTIFICATION || boardType == BoardType.DEVELOPMENT) {
             val list = SecurityContextHolder.getContext().authentication.authorities
             if(!list.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
                 result["message"]="잘못된 접근입니다."

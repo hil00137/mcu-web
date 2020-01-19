@@ -21,8 +21,9 @@
                         {{typeName}}
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a @click="selectType($event)" href="#" id="type_suggestion" value="suggestion">건의 게시판</a></li>
                         <li sec:authorize="hasRole('ROLE_ADMIN')"><a @click="selectType($event)" href="#" id="type_notification" value="notification">공지사항</a></li>
+                        <li sec:authorize="hasRole('ROLE_ADMIN')"><a @click="selectType($event)" href="#" id="type_development" value="development">개발자 게시판</a></li>
+                        <li><a @click="selectType($event)" href="#" id="type_suggestion" value="suggestion">건의 게시판</a></li>
                     </ul>
                 </div>
             </div>
