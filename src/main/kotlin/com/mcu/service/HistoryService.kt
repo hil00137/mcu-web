@@ -63,7 +63,7 @@ class HistoryService {
         val mail = Mail()
         mail.toName = "운영자"
         mail.toMail = reportMail
-        mail.subject = "${DateUtil.transMailFormYmdh(currentDate)} 리포트 메일"
+        mail.subject = "${DateUtil.transMailFormYmdh(LocalDateTime.now())} 리포트 메일"
 
         val countMap = HashMap<String, Int>()
         val detailMap = HashMap<String, PaginatedList<History>?>()
@@ -74,7 +74,7 @@ class HistoryService {
             }
         }
 
-        mail.setReportContent(currentDate, countMap, detailMap)
+        mail.setReportContent(countMap, detailMap)
         val result = mailSendUtil.sendEmail(mail)
         this.writeHistoryAsSystem("Report Send : ${result["result"]} , ${result["message"]}")
    }
