@@ -23,7 +23,8 @@ class BoardRepository {
         awsConnector.getDynamoDBMapper().save(item)
         return awsConnector.getDynamoDBMapper().load(item)
     }
-
+    
+    @CacheEvict(value = ["boardCache"], allEntries = true)
     fun delete(item : Board) {
         awsConnector.getDynamoDBMapper().delete(item)
     }
