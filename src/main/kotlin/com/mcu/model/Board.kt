@@ -78,5 +78,6 @@ class DeletedBoard() {
  */
 enum class BoardType(val type: String) {
     SUGGESTION("suggestion"),
-    NOTIFICATION("notification")
+    NOTIFICATION("notification"),
+    DEVELOPMENT("development")
 }

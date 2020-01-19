@@ -12,6 +12,7 @@
         <ul class="nav nav-pills">
             <input type="hidden" id="boardType" th:value="${board.getType()}"/>
             <li role="presentation" id="type_notification"><a href="#" value="notification" onclick="goBoardList(this)">공지사항</a></li>
+            <li role="presentation" id="type_development"><a href="#" value="development" onclick="goBoardList(this)">개발자 게시판</a></li>
             <li role="presentation" id="type_suggestion"><a href="#" value="suggestion" onclick="goBoardList(this)">건의 게시판</a></li>
         </ul>
         <div class="page-header col-xs-12" id="board-subject">
