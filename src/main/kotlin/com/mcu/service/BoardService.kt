@@ -57,14 +57,14 @@ class BoardService {
     }
 
     /**
-     * 게시글 저장 캐시 삭제
+     * 게시글 저장
      */
     fun saveBoard(board: Board): Board {
         board.subject = StringUtil.checkScriptInjection(board.subject)
         if (StringUtil.isScriptInjection(board.subject)) {
             logger.warn("Script Injection occurred by ${board.userId}")
             board.subject = StringUtil.removeLabel(board.subject)
-            historyService.writeHistory("Script Injection", HistoryPriority.RULE_OVER.name)
+            historyService.writeHistory("Script Injection", HistoryPriority.RULE_OVER)
         }
         
         board.content = StringUtil.checkScriptInjection(board.content)

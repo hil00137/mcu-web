@@ -1,6 +1,7 @@
 package com.mcu.agent
 
 import com.amazonaws.services.ec2.model.Instance
+import com.mcu.model.HistoryPriority
 import com.mcu.model.Server
 import com.mcu.service.AwsManagementService
 import com.mcu.service.HistoryService
@@ -123,7 +124,7 @@ class ServerManagementAgent {
                 if (gap >= 3) {
                     logger.info("Server Shutdown")
                     awsManagementService.stopInstance(server.aws.awsId.toString())
-                    historyService.writeHistoryAsSystem("Server Shutdown")
+                    historyService.writeHistoryAsAdmin("Server Shutdown", HistoryPriority.SYSTEM)
                 }
             }
         } else {

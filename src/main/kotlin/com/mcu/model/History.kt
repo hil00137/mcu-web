@@ -25,8 +25,10 @@ class History {
 }
 
 enum class HistoryPriority(val msgName : String) {
+    NEW_BOARD("신규글"),
     SYSTEM("시스템메시지"),
-    USER_REQUEST("유저요청"),
+    USER_REQUEST("사용자요청"),
+    USER_SIGN("신규유저"),
     RULE_OVER("위반사항"),
     ERROR("에러")
 }

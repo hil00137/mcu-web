@@ -59,7 +59,7 @@ class McuServerController {
         try {
             result = awsManagementService.startInstance(server.aws.awsId.toString())
             logger.info("Sever Start")
-            historyService.writeHistory("Server Start", HistoryPriority.USER_REQUEST.name)
+            historyService.writeHistory("Server Start", HistoryPriority.USER_REQUEST)
         } catch (e: Exception) {
             e.printStackTrace()
             return "재시도 하여주시길 바랍니다. 지속적인 발생시 관리자에게 문의 바랍니다."

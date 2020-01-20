@@ -45,7 +45,7 @@ class UserController {
         user?.let {
             userService.registerUser(it)?:"saved error"
         }?: return "error"
-        historyService.writeHistory("Sign Up ${user.userId}",HistoryPriority.SYSTEM.name)
+        historyService.writeHistory("Sign Up ${user.userId}",HistoryPriority.SYSTEM)
         return "OK"
     }
 
@@ -104,6 +104,7 @@ class UserController {
         if (user.mailAuth == "wait" && user.mailAuthCode == HashUtil.decrpytAES256(emailAuthCode)) {
             request.setAttribute("errorMessage","이메일이 인증되었습니다.")
             logger.info("${user.userId} mail authenticate success")
+            historyService.writeHistoryAsAdmin("${user.userId} mail authenticate success", HistoryPriority.USER_SIGN)
             userService.emailAuthSuccess(user)
         } else {
             request.setAttribute("errorMessage", "인증에 실패하였습니다.")

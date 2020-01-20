@@ -77,12 +77,13 @@ class BoardRestController {
             val list = SecurityContextHolder.getContext().authentication.authorities
             if(!list.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
                 result["message"]="잘못된 접근입니다."
-                historyService.writeHistory("Access is not allowed.[save board] from $userId", HistoryPriority.RULE_OVER.name)
+                historyService.writeHistory("Access is not allowed.[save board] from $userId", HistoryPriority.RULE_OVER)
                 return result;
             }
         }
         board.userId = userId
         val boardId = boardService.saveBoard(board).id
+        historyService.writeHistory("Register new board by $userId", HistoryPriority.NEW_BOARD)
         result["message"] = "success"
         result["boardId"] = boardId!!
         return result
@@ -103,10 +104,10 @@ class BoardRestController {
             boardService.deleteBoard(board)
             boardArchiveService.deleteAll(board.id?:"")
             commentService.deleteAll(board.id?:"")
-            historyService.writeHistory("delete board id : $id from $requestId", HistoryPriority.USER_REQUEST.name)
+            historyService.writeHistory("delete board id : $id from $requestId", HistoryPriority.USER_REQUEST)
             "삭제하였습니다."
         } else {
-            historyService.writeHistory("Access is not allowed.[delete board] from $requestId", HistoryPriority.RULE_OVER.name)
+            historyService.writeHistory("Access is not allowed.[delete board] from $requestId", HistoryPriority.RULE_OVER)
             "권한이 없습니다."
         }
     }
@@ -122,10 +123,10 @@ class BoardRestController {
         val requestId = SecurityContextHolder.getContext().authentication.principal as String
         val oriBoard = boardService.getBoardById(newBoard.id!!)
         if(oriBoard == null) {
-            historyService.writeHistory("Access is not allowed.[modify board] from $requestId", HistoryPriority.RULE_OVER.name)
+            historyService.writeHistory("Access is not allowed.[modify board] from $requestId", HistoryPriority.RULE_OVER)
             return "잘못된 접근입니다."
         } else if(oriBoard.userId != requestId) {
-            historyService.writeHistory("Access is not allowed.[modify board] from $requestId", HistoryPriority.RULE_OVER.name)
+            historyService.writeHistory("Access is not allowed.[modify board] from $requestId", HistoryPriority.RULE_OVER)
             return "잘못된 접근입니다."
         }
         boardArchiveService.archiving(oriBoard, newBoard)

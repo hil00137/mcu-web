@@ -39,7 +39,7 @@ class CommentController {
             boardService.getBoardById(it)
         }
         if (board == null) {
-            historyService.writeHistory("Access is not allowed.[save board] from $userId", HistoryPriority.RULE_OVER.name)
+            historyService.writeHistory("Access is not allowed.[save board] from $userId", HistoryPriority.RULE_OVER)
             return "잘못된 접근입니다."
         }
         comment.userId = userId
@@ -89,7 +89,7 @@ class CommentController {
             boardService.commentCount(boardService.getBoardById(comment.boardId!!)!!, -1)
             "success"
         } else {
-            historyService.writeHistory("Access is not allowed.[delete comment] from $requestId", HistoryPriority.RULE_OVER.name)
+            historyService.writeHistory("Access is not allowed.[delete comment] from $requestId", HistoryPriority.RULE_OVER)
             "권한이 없습니다."
         }
     }
