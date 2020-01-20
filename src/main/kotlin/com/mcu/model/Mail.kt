@@ -49,7 +49,7 @@ class Mail {
     fun setReportContent(countMap: HashMap<String, Int>, detailMap : HashMap<String, PaginatedList<History>?>) {
         val stringBuilder = StringBuilder()
         stringBuilder.append("<html><body>${NEW_LINE}")
-        stringBuilder.append("${DateUtil.transMailFormYmdh(LocalDateTime.now())} 레포트$brTag$NEW_LINE")
+        stringBuilder.append("${DateUtil.transMailFormYmdh(LocalDateTime.now())} 리포트$brTag$NEW_LINE")
         var check = false
         HistoryPriority.values().forEach {
             if(countMap[it.name] == 0) {

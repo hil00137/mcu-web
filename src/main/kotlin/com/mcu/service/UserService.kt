@@ -7,7 +7,6 @@ import com.mcu.util.HashUtil
 import com.mcu.util.MailSendUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.web.context.request.RequestContextHolder
@@ -24,15 +23,15 @@ class UserService {
     private lateinit var homepageUrl : String
 
     @Autowired
-    private lateinit var dynamoUserRepository : UserRepository
+    private lateinit var userRepository : UserRepository
 
     @Cacheable(value = ["userCache"], key = "'userId:' + #userId")
-    fun getUserByUserId(userId : String) = dynamoUserRepository.findUserByUserId(userId)
+    fun getUserByUserId(userId : String) = userRepository.findUserByUserId(userId)
     @Cacheable(value = ["userCache"], key = "'nickname:' + #nickname")
-    fun getUserByNickname(nickname : String) = dynamoUserRepository.findUserByNickname(nickname)
+    fun getUserByNickname(nickname : String) = userRepository.findUserByNickname(nickname)
     @Cacheable(value = ["userCache"], key = "'email:' + #email")
-    fun getUserByEmail(email : String) = dynamoUserRepository.findUserByEmail(email)
-    @CacheEvict(value = ["userCache"], allEntries = true)
+    fun getUserByEmail(email : String) = userRepository.findUserByEmail(email)
+
     fun registerUser(user: User): User? {
         user.password = HashUtil.sha512(user.password)
         user.mailAuthCode = UUID.randomUUID().toString().replace("-","").substring(0,9)
@@ -53,9 +52,9 @@ class UserService {
                 targetUser.mailAuthCode = null
                 targetUser.mailAuthFailReason = resultMap["message"]
             }
-            dynamoUserRepository.save(targetUser)
+            userRepository.save(targetUser)
         }.start()
-        return dynamoUserRepository.save(user)
+        return userRepository.save(user)
     }
 
     fun getIp() : String {
@@ -70,6 +69,6 @@ class UserService {
     fun emailAuthSuccess(user: User) {
         user.mailAuth = "success"
         user.mailAuthCode = null
-        dynamoUserRepository.save(user)
+        userRepository.save(user)
     }
 }

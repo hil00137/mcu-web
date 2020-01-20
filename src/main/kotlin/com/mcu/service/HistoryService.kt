@@ -31,7 +31,7 @@ class HistoryService {
     /**
      * @param priority -> History Priority
      */
-    fun writeHistory(message: String, priority : String) {
+    fun writeHistory(message: String, priority : HistoryPriority) {
         val history = History()
         val userId  = SecurityContextHolder.getContext().authentication.principal as String
         history.userId = userId
@@ -43,17 +43,17 @@ class HistoryService {
         history.ip = ip?:""
         history.date = LocalDateTime.now()
         history.detail = message
-        history.priority = priority
+        history.priority = priority.name
         historyRepository.save(history)
     }
 
-    fun writeHistoryAsSystem(message: String) {
+    fun writeHistoryAsAdmin(message: String, priority : HistoryPriority) {
         val history = History()
         history.userId = "admin"
         history.ip = "127.0.0.1"
         history.date = LocalDateTime.now()
         history.detail = message
-        history.priority = HistoryPriority.SYSTEM.name
+        history.priority = priority.name
         historyRepository.save(history)
     }
 
@@ -76,6 +76,6 @@ class HistoryService {
 
         mail.setReportContent(countMap, detailMap)
         val result = mailSendUtil.sendEmail(mail)
-        this.writeHistoryAsSystem("Report Send : ${result["result"]} , ${result["message"]}")
+        this.writeHistoryAsAdmin("Report Send : ${result["result"]} , ${result["message"]}", HistoryPriority.SYSTEM)
    }
 }
