@@ -153,7 +153,7 @@
                         this.nicknameMessageClass = 'text-danger';
                         return false;
                     }
-                    axios.get('/user/checkNickname/'+this.nickname)
+                    axios.get('/user/checkNickname/'+encodeURI(this.nickname))
                         .then(value => {
                             if(value.data === "OK") {
                                 this.nicknameMessage = "사용가능한 닉네임입니다.";
@@ -180,7 +180,7 @@
                     }
 
                     if (this.email.indexOf("@") < 0) {
-                        nicknameChecked = false;
+                        emailChecked = false;
                         this.emailMessage = "email 형태가 아닙니다.";
                         this.emailMessageClass = 'text-danger';
                         return false;
