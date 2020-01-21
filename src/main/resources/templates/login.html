@@ -159,7 +159,7 @@
     <th:block layout:fragment="script">
         <script th:if="${#request.getAttribute('errorMessage') != null}">
             alert(document.getElementById("errorMessage").value);
-            window.location.replace("http://www.mcedu.co.kr/user/login")
+            location.href = ('/user/login');
         </script>
         <script>
             const agent = navigator.userAgent.toLowerCase();
