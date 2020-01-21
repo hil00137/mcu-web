@@ -68,7 +68,8 @@ class UserController {
     @ResponseBody
     @GetMapping("/checkNickname/{nickname}")
     fun nicknameCheck(@PathVariable nickname : String) : String {
-        val user = userService.getUserByNickname(nickname)
+        val decodeNickname = URLDecoder.decode(nickname,"UTF-8")
+        val user = userService.getUserByNickname(decodeNickname)
         return if (user == null) {
             "OK"
         } else {
