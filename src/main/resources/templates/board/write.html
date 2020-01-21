@@ -8,7 +8,6 @@
 <th:block layout:fragment="content">
     <div class="container" style="border-color: #dddddd; border-style: solid; border-width: thin; padding: 10px; margin-bottom: 20px">
         <form id="boardWriteForm" class="form-group" method="post">
-            <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <input type="hidden" th:if="${board != null}" id="boardId" th:value="${board.id}">
             <input type="hidden" th:if="${board != null}" id="boardType" th:value="${board.type}">
             <input type="hidden" th:if="${board != null}" id="boardSubject" th:value="${board.subject}">
