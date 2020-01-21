@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="~{layout/afterLogin.html}">
+<head>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="container">
+        <div class="col-sm-3" id="infoPanel">
+            <div class="list-group ">
+                <a href="#" class="list-group-item active" @click="typeChange" id="type_myInfo" value="myInfo">
+                    내 정보
+                </a>
+<!--                <a href="#" class="list-group-item" @click="typeChange" id="type_youInfo" value="youInfo">니 정보</a>-->
+<!--                <a href="#" class="list-group-item">Morbi leo risus</a>-->
+<!--                <a href="#" class="list-group-item">Porta ac consectetur ac</a>-->
+<!--                <a href="#" class="list-group-item">Vestibulum at eros</a>-->
+            </div>
+        </div>
+        <div class="col-sm-9" id="myInfo" name="infos">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">내 정보</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">아이디</label>
+                            <div class="col-sm-10">
+                                <p class="form-control-static" id="text_userId">{{userId}}</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="text_nickname" class="col-sm-2 control-label">닉네임</label>
+                            <div class="col-sm-10" v-if="!canEdit">
+                                <p class="form-control-static" id="text_nickname">{{nickname}}</p>
+                            </div>
+                            <div class="col-sm-10" v-if="canEdit">
+                                <input class="form-control" id="input_nickname" v-model="changeNickName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="text_email" class="col-sm-2 control-label">이메일</label>
+                            <div class="col-sm-10" v-if="!canEdit">
+                                <p class="form-control-static" id="text_email">{{email}}</p>
+                            </div>
+                            <div class="col-sm-10" v-if="canEdit">
+                                <input class="form-control" id="input_email" v-model="changeEmail">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">비밀번호</label>
+                            <div class="col-sm-8">
+                                <input v-if="!canEdit" class="form-control" id="input_CheckPassword" placeholder="비밀번호 입력" type="password" v-model="oriPassword" @keydown.enter="enterKeyPress('modify')">
+                                <input v-if="canEdit" class="form-control" id="input_password" placeholder="비밀번호 입력" type="password" v-model="firstPassword">
+                            </div>
+                        </div>
+                        <div class="form-group" v-if="canEdit">
+                            <label class="col-sm-2 control-label">비밀번호 확인</label>
+                            <div class="col-sm-8">
+                                <input class="form-control" id="input_password2" placeholder="비밀번호 확인" type="password" v-model="secondPassword" @keydown.enter="enterKeyPress('confirm')">
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <input type="button" class="btn btn-default" style="float:right;" value="수정" @click="modifyMode" v-if="!canEdit">
+                            <input type="button" class="btn btn-primary" style="float:right;" value="완료" @click="modifySubmit" v-if="canEdit">
+                            <input type="button" class="btn btn-default" style="float:right;" value="취소" @click="modifyCancel" v-if="canEdit">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <p>정보를 수정하려면 비밀번호를 입력후 수정버튼을 눌러주시기 바랍니다.<br>
+                        이메일 수정시 새로운 이메일로 인증메일이 발송됩니다.</p>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9" id="youInfo" hidden="hidden" name="infos">
+            <div class="panel panel-primary" id="youInfoPanel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">니정보</h3>
+                </div>
+                <div class="panel-body">
+                    <input type="button" value="aa">
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block layout:fragment="script">
+    <script>
+        const infoPanel = new Vue({
+            el : '#infoPanel',
+            data : {
+                activePanel : 'myInfo',
+                userId : ''
+            },
+           methods: {
+                typeChange : function(event) {
+                    const current = document.getElementById("type_"+this.activePanel);
+                    current.classList.remove("active");
+                    const target = event.target;
+                    target.classList.add("active");
+                    this.activePanel = target.getAttribute("value");
+                    const infos = document.getElementsByName("infos");
+                    infos.forEach(it => it.setAttribute("hidden","hidden"));
+                    document.getElementById(this.activePanel).removeAttribute("hidden")
+                }
+           }
+        });
+
+        const myInfo = new Vue({
+            el: '#myInfo',
+            data : {
+                userId : '',
+                email : '',
+                changeEmail : '',
+                nickname : '',
+                changeNickName : '',
+                oriPassword : '',
+                canEdit : false,
+                emailChecked : true,
+                nicknameChecked : true,
+                emailMessage : '',
+                nicknameMessage : '',
+                firstPassword : '',
+                secondPassword : '',
+                pwdMessage : '',
+                pwdChecked : true
+            },
+            methods : {
+                getUserDetail : function() {
+                    axios.get('/user/info/detail/'+this.userId)
+                    .then(value => {
+                        const result = value.data;
+                        this.email = result.email;
+                        this.changeEmail = this.email;
+                        this.nickname = result.nickname;
+                        this.changeNickName = this.nickname;
+                        // console.log(result);
+                    }).catch(reason => "");
+                },
+                modifyMode : function() {
+                    this.oriPassword = this.oriPassword.trim();
+                    if(this.oriPassword === "") {
+                        return;
+                    }
+                    axios.post('/user/info/checkPassword', {
+                        userId : this.userId,
+                        password : this.oriPassword
+                    }, {
+                        headers: {
+                            "X-CSRF-TOKEN": document.getElementById("csrf").value
+                        }
+                    }).then(value => {
+                        if(value.data.code !== "success") {
+                            alert(value.data.message);
+                            document.getElementById("input_CheckPassword").focus();
+                        } else {
+                            this.canEdit = true;
+                        }
+                    }).catch(reason => "");
+                },
+                modifyCancel : function () {
+                    this.oriPassword = "";
+                    this.changeEmail = this.email;
+                    this.changeNickName = this.nickname;
+                    this.emailChecked = true;
+                    this.nicknameChecked = true;
+                    this.firstPassword = '';
+                    this.secondPassword = '';
+                    this.pwdChecked = true;
+                    this.canEdit = false;
+                },
+                modifySubmit : function() {
+                    this.nicknameCheck();
+                    if(!this.nicknameChecked) {
+                        if(this.nicknameMessage !== '') {
+                            alert(this.nicknameMessage);
+                        }
+                        return;
+                    }
+                    this.emailCheck();
+                    if(!this.emailChecked) {
+                        if(this.emailMessage !== '') {
+                            alert(this.emailMessage);
+                        }
+                        return;
+                    }
+                    this.pwdCheck();
+                    if(!this.pwdChecked) {
+                        if(this.pwdMessage !== '') {
+                            alert(this.pwdMessage);
+                        }return;
+                    }
+
+                    var confirmMessage = '';
+                    if(this.email !== this.changeEmail) {
+                        confirmMessage += '이메일 '
+                    }
+
+                    if(this.nickname !== this.changeNickName) {
+                        confirmMessage += '닉네임 '
+                    }
+
+                    if(this.firstPassword !== '' && this.firstPassword === this.secondPassword) {
+                        confirmMessage += '비밀번호 '
+                    }
+
+                    if(confirmMessage === '') {
+                        alert("변경할 내용이 없습니다.");
+                        return;
+                    }
+                    if(confirm(confirmMessage + "변경하시겠습니까?")) {
+                        this.save();
+                    }
+                },
+                emailCheck : function() {
+                    this.changeEmail = this.changeEmail.trim();
+                    if(this.changeEmail === this.email) {
+                        this.emailChecked = true;
+                        this.emailMessage = "";
+                        return;
+                    }
+                    if (this.changeEmail === "") {
+                        this.emailChecked = false;
+                        this.emailMessage = "이메일이 비어있습니다.";
+                        return false;
+                    }
+
+                    if (this.changeEmail.indexOf("@") < 0) {
+                        this.emailChecked = false;
+                        this.emailMessage = "email 형태가 아닙니다.";
+                        return false;
+                    }
+
+                    axios.get('/user/checkEmail/'+this.changeEmail)
+                        .then(value => {
+                            if(value.data === "OK") {
+                                this.emailChecked = true;
+                            } else {
+                                this.emailMessage = "중복된 이메일입니다.";
+                                this.emailChecked = false;
+                            }
+                        });
+                },
+                nicknameCheck : function() {
+                    this.changeNickName = this.changeNickName.trim();
+                    if(this.changeNickName === this.nickname) {
+                        this.nicknameChecked = true;
+                        this.nicknameMessage = "";
+                        return;
+                    }
+                    if(this.changeNickName === "") {
+                        this.nicknameChecked = false;
+                        this.nicknameMessage = "공백 닉네임은 허용되지 않습니다.";
+                        return false;
+                    }
+                    if (this.changeNickName.length > 10) {
+                        this.changeNickName = false;
+                        this.nicknameMessage = "닉네임 길이가 너무 깁니다.";
+                        return false;
+                    }
+                    axios.get('/user/checkNickname/'+encodeURI(this.changeNickName))
+                        .then(value => {
+                            if(value.data === "OK") {
+                                this.nicknameChecked = true;
+                            } else {
+                                this.nicknameMessage = "중복된 닉네임입니다.";
+                                this.nicknameChecked = false;
+                            }
+                        });
+                },
+                nicknameCheckReset : function() {
+                    this.nicknameChecked = false;
+                },
+                pwdCheck : function() {
+                    this.firstPassword = this.firstPassword.trim();
+                    this.secondPassword = this.secondPassword.trim();
+                    if(this.firstPassword === '' && this.secondPassword === '') {
+                        this.pwdChecked = true;
+                        this.pwdMessage = '';
+                        return;
+                    }
+                    const test = /^.*(?=^.{8,12}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/.exec(this.firstPassword);
+
+                    if(test == null) {
+                        this.pwdMessage = '문자, 숫자, 특수문자를 포함하여 8~12자리로 만들어주세요';
+                        this.pwdChecked = false;
+                        return;
+                    }
+
+                    if(this.firstPassword !== this.secondPassword) {
+                        this.pwdMessage = '비밀번호 확인이 일치하지 않습니다.';
+                        this.pwdChecked = false;
+                        return false;
+                    } else {
+                        this.pwdMessage = '';
+                        this.pwdChecked = true;
+                    }
+
+                },
+                enterKeyPress : function(checkType) {
+                    if (checkType === 'modify') {
+                        this.modifyMode();
+                    } else if (checkType === 'confirm') {
+                        this.modifySubmit();
+                    }
+                },
+                save : function () {
+                    axios.put('/user/info/change', {
+                        userId : this.userId,
+                        password : this.firstPassword,
+                        nickname : this.changeNickName,
+                        email : this.changeEmail
+                    }, {
+                        headers: {
+                            "X-CSRF-TOKEN": document.getElementById("csrf").value
+                        }
+                    }).then(value => {
+                        if(value.data.code !== "success") {
+                            alert(value.data.message);
+                        } else {
+                            alert(value.data.message);
+                            if(value.data.url !== "") {
+                                location.href = value.data.url;
+                            }
+                        }
+                    }).catch(reason => "");
+                }
+
+            },
+            mounted : function() {
+                this.userId = document.getElementById("loginUserId").value;
+                this.getUserDetail();
+            }
+        });
+    </script>
+</th:block>
+<th:block layout:fragment="css">
+</th:block>
+</body>

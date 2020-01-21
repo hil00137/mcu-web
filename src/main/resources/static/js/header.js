@@ -15,6 +15,9 @@ const headerVue = new Vue({
         },
         goBoard: function () {
             location.href = "/board";
+        },
+        goUserInfo : function () {
+            location.href = "/user/info"
         }
     },
     mounted: function () {

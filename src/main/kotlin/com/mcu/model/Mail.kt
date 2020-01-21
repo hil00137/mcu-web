@@ -6,7 +6,11 @@ import com.mcu.util.HashUtil
 import java.time.LocalDateTime
 import java.util.*
 
-class Mail {
+class Mail() {
+    constructor(user : User) : this() {
+        this.toMail = user.email?:""
+        this.toName = user.nickname?:""
+    }
     companion object {
         const val NEW_LINE = "\r\n"
         const val brTag = "<br>"
@@ -43,6 +47,31 @@ class Mail {
         stringBuilder.append("<a href=\"${url}/user/emailAuth?userId=${userId}&emailAuthCode=${mailAuthCode}\">메일 인증하기</a>$brTag$NEW_LINE")
         stringBuilder.append("감사합니다.$brTag$NEW_LINE")
         stringBuilder.append("</body></html>$NEW_LINE")
+        this.content = stringBuilder.toString()
+    }
+
+    fun setEmailChangeContent(ip : String, url : String, user: User) {
+        val userId = HashUtil.encryptAES256(user.userId?:"")
+        val mailAuthCode = HashUtil.encryptAES256(user.mailAuthCode!!)
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("<html><body>$NEW_LINE")
+        stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")
+        stringBuilder.append("${ip}로부터 ${this.toName}님의 메일변경을 요청하였습니다. $brTag$NEW_LINE")
+        stringBuilder.append("본인이 맞으시다면 아래 URL을 클릭해주시길 바랍니다.$brTag$NEW_LINE")
+        stringBuilder.append("<a href=\"${url}/user/emailAuth?userId=${userId}&emailAuthCode=${mailAuthCode}\">메일 인증하기</a>$brTag$NEW_LINE")
+        stringBuilder.append("감사합니다.$brTag$NEW_LINE")
+        stringBuilder.append("</body></html>$NEW_LINE")
+        this.content = stringBuilder.toString()
+    }
+
+    fun setEmailChangeFailContent(ip : String, email : String) {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("<html><body>$NEW_LINE")
+        stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")
+        stringBuilder.append("${ip}로부터 ${this.toName}님의 이메일 변경을 요청하였습니다. $brTag$NEW_LINE")
+        stringBuilder.append("하지만 해당 email : $email 에 메일을 전송하는동안 에러가 발생하였습니다.$brTag$NEW_LINE")
+        stringBuilder.append("수신거부 혹은 존재하는 메일인지 확인하여 주시길바랍니다.$brTag$NEW_LINE")
+        stringBuilder.append("등록하신 메일은 기존의 메일로 변경되었습니다.$brTag$NEW_LINE")
         this.content = stringBuilder.toString()
     }
 
