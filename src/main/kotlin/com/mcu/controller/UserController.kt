@@ -39,6 +39,11 @@ class UserController {
         return "signUp"
     }
 
+    @GetMapping("/info")
+    fun goUserInfoPage() : String {
+        return "user/info"
+    }
+
     @ResponseBody
     @PostMapping("/signUp")
     fun signUp(@RequestBody user: User?) : String {
