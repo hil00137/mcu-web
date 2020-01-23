@@ -45,6 +45,11 @@ class UserController {
         return "user/info"
     }
 
+    @GetMapping("/findInfo")
+    fun goFindInfoPage() : String {
+        return "findInfo"
+    }
+
     @GetMapping("/emailAuth")
     fun emailAuth(request : HttpServletRequest) : String {
         val userId = request.getParameter("userId")?:""
