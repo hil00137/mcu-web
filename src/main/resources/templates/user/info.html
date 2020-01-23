@@ -137,6 +137,9 @@
                         this.changeEmail = this.email;
                         this.nickname = result.nickname;
                         this.changeNickName = this.nickname;
+                        if(result.isPasswordChange === 'true') {
+                            alert("비밀번호를 변경해주시길 바랍니다.");
+                        }
                         // console.log(result);
                     }).catch(reason => "");
                 },

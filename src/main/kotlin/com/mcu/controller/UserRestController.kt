@@ -51,6 +51,7 @@ class UserRestController {
                 return result
             }
             searchUser.password = HashUtil.sha512(user.password)
+            searchUser.isPasswordChange = null
             userService.update(searchUser)
             result["code"] = "success"
             result["url"] = "/user/logout"
@@ -96,6 +97,7 @@ class UserRestController {
         val result = HashMap<String, String>()
         result["nickname"] = user?.nickname?:""
         result["email"] = user?.email?:""
+        result["isPasswordChange"] = user?.isPasswordChange.toString()
         return result
     }
 
@@ -180,6 +182,33 @@ class UserRestController {
         userService.findFullId(user)
         result["code"] = "success"
         result["message"] = "이메일을 확인해주시길 바랍니다.(스팸메시지함도 확인해주시길 바랍니다.)"
+        historyService.writeHistory("Send email for finding user id ${user.userId}", HistoryPriority.USER_REQUEST)
+        return result
+    }
+
+    @PostMapping("/findInfo/pwd")
+    fun resetMyPassword(@RequestBody param : Properties) : HashMap<String, String> {
+        val email = (param["email"] as String)
+        val id = (param["id"] as String)
+        val user = userService.getUserByEmail(email)
+        val result = HashMap<String, String>()
+        if (user == null) {
+            result["code"] = "fail"
+            result["message"] = "잘못된 이메일입니다."
+            historyService.writeHistory("Reset Password Fail By Wrong Email", HistoryPriority.USER_REQUEST)
+            return result
+        }
+
+        if(user.userId != id) {
+            result["code"] = "fail"
+            result["message"] = "잘못된 아이디입니다. 아이디 찾기를 먼저 해주시길 바랍니다."
+            historyService.writeHistory("Reset Password Fail By Wrong Id [${user.userId}]", HistoryPriority.USER_REQUEST)
+            return result
+        }
+        userService.resetPassword(user)
+        result["code"] = "success"
+        result["message"] = "이메일을 확인해주시길 바랍니다."
+        historyService.writeHistory("Send email for temporary password ${user.userId}", HistoryPriority.USER_REQUEST)
         return result
     }
 }

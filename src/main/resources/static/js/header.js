@@ -21,10 +21,8 @@ const headerVue = new Vue({
         }
     },
     mounted: function () {
-        const headerList = ["home","guide","board"];
+        const headerList = ["home","guide","board","user/info"];
         const url = window.location.href;
-        const index = url.lastIndexOf("/");
-        const current = url.substring(index + 1);
         try {
             for(let i=0; i<headerList.length; i++) {
                 if(url.match(headerList[i])) {

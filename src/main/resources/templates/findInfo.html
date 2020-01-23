@@ -9,14 +9,19 @@
     <div class="container" style="margin-top: 15%;" id="findInfo">
         <h1 style="text-align: center;"><a href="/user/login">마크대학</a></h1>
         <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <div class="alert alert-warning" role="alert" v-if="type == 'id'">아이디를 잃어버리셨나요? 아래에 메일주소를 입력해주시길 바랍니다.</div>
+        <div class="alert alert-warning" role="alert">{{infoMessage}}</div>
         <form class="form-horizontal" @submit.prevent="submit">
+            <label for="input_Email" v-if="type == 'pwd'">아이디</label>
+            <input type="text" class="form-control" v-model="findId" id="input_Id" v-if="type == 'pwd'">
             <label for="input_Email">Email</label>
             <input type="email" class="form-control" v-model="findEmail" id="input_Email">
-            <input type="button" class="btn btn-primary" value="아이디 찾기" style="float:right; margin-top: 1%; margin-bottom: 1%" v-if="type == 'id'" @click="findMyId">
+            <input type="button" class="btn btn-primary" value="아이디 찾기" style="float:right; margin: 1%;" v-if="type == 'id'" @click="findMyId">
+            <input type="button" class="btn btn-primary" value="비밀번호 전송하기" style="float:right; margin: 1%;" v-if="type == 'pwd'" @click="findMyPwd">
+            <input type="button" class="btn btn-secondary" value="비밀번호 찾기로" style="float:right; margin-top: 1%; margin-bottom: 1%" v-model="typeButton" @click="changeType">
             <div class="alert alert-success col-sm-12" role="alert" v-if="type == 'id' && foundId != ''">찾으시는 아이디가 {{foundId}}입니까? 메일로 전체 아이디를 확인하시려면 아래 버튼을 클릭해주시길 바랍니다.</div>
             <div class="alert alert-danger col-sm-12" role="alert" v-if="message != ''">{{message}}</div>
-            <input type="button" class="btn btn-primary" value="전체 아이디 찾기" style="float:right; margin-top: 1%; margin-bottom: 1%" v-if="type == 'id' && foundId != ''" @click="findMyFullId">
+            <input type="button" class="btn btn-primary" v-model="staticBtn" style="float:right; margin-top: 1%; margin-bottom: 1%" v-if="type == 'id' && foundId != ''" @click="findMyFullId">
+
         </form>
     </div>
 </th:block>
@@ -27,9 +32,14 @@
            data : {
                type : 'id',
                findEmail : '',
+               findId : '',
                checkEmail : '',
+               checkId : "",
                foundId : '',
-               message : ''
+               infoMessage : '아이디를 잃어버리셨나요? 아래에 메일주소를 입력해주시길 바랍니다.',
+               message : '',
+               typeButton : '비밀번호 찾기로',
+               staticBtn : '전체 아이디 찾기'
            },
             methods: {
                findMyId : function() {
@@ -85,7 +95,62 @@
                         }).catch(reason => {
                             return false;
                         });
+                    }
+                },
+                findMyPwd : function() {
+                    this.findEmail = this.findEmail.trim();
+                    this.checkEmail = this.findEmail;
+                    if (this.checkEmail === '') {
+                        alert("이메일이 비어있습니다.");
                         return;
+                    }
+
+                    if (this.checkEmail.indexOf("@") < 0) {
+                        alert("이메일 형태가 아닙니다.");
+                        return;
+                    }
+
+                    this.findId = this.findId.trim();
+                    this.checkId = this.findId;
+                    if (this.checkId === '') {
+                        alert("아이디가 비어있습니다.");
+                        return;
+                    }
+
+                    if (!confirm("비밀번호를 초기화 하시겠습니까?")) {
+                        return;
+                    }
+
+                    axios.post('/user/findInfo/pwd', {
+                            email: this.checkEmail,
+                            id: this.checkId
+                        },
+                        {
+                            headers: {
+                                "X-CSRF-TOKEN": document.getElementById("csrf").value
+                            }
+                        }
+                    ).then(value => {
+                        if (value.data.code === "success") {
+                            alert(value.data.message);
+                            this.message = '';
+                            location.href = "login"
+                        } else if (value.data.code === "fail") {
+                            this.message = value.data.message;
+                        }
+                    }).catch(reason => {
+                        return false;
+                    });
+                },
+                changeType : function() {
+                    if(this.type === 'id') {
+                        this.type = 'pwd';
+                        this.typeButton = '아이디 찾기로';
+                        this.infoMessage = '임시 비밀번호를 발급 받으시려면, 아래에 메일주소와 아이디를 입력해 주시길바랍니다.';
+                    } else if(this.type === 'pwd') {
+                        this.type = 'id';
+                        this.typeButton = '비밀번호 초기화';
+                        this.infoMessage = '아이디를 잃어버리셨나요? 아래에 메일주소를 입력해주시길 바랍니다.';
                     }
                 }
             }
