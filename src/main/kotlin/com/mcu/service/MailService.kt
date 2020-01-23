@@ -18,23 +18,21 @@ class MailService {
 
     fun sendEmail(prop : Properties) {
         val user = prop["user"] as User
+        val ip = prop["ip"] as String
 
         Thread {
             val mail = Mail(user)
             when (prop["request"]) {
                 "findFullId" -> {
-                    mail.subject = "마크대학 아이디 찾기 메일입니다."
-                    mail.setEmailFindFullId(prop["ip"] as String, user.userId!!)
+                    mail.setEmailFindFullId(ip, user.userId!!)
                     mailSendUtil.sendEmail(mail)
                 }
                 "errorEmailNotify" -> {
-                    mail.subject = "인증메일 전송에 실패하였습니다"
-                    mail.setEmailChangeFailContent(prop["ip"] as String, prop["failEmail"] as String)
+                    mail.setEmailChangeFailContent(ip, prop["failEmail"] as String)
                     mailSendUtil.sendEmail(mail)
                 }
                 "emailChangeMail" -> {
-                    mail.subject = "마크대학 이메일 인증메일입니다"
-                    mail.setEmailChangeContent(prop["ip"] as String, prop["url"] as String, user)
+                    mail.setEmailChangeContent(ip, prop["url"] as String, user)
                     val resultMap = mailSendUtil.sendEmail(mail)
                     resultMap["oriEmail"] = prop["oriEmail"] as String
                     resultMap["ip"] = prop["ip"] as String
