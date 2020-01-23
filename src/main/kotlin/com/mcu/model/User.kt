@@ -29,4 +29,6 @@ class User(@DynamoDBHashKey(attributeName = "userId") var userId: String? = "") 
     var mailAuthCode : String? = null
     @DynamoDBAttribute(attributeName = "mailAuthFailReason")
     var mailAuthFailReason : String? = null
+    @DynamoDBAttribute
+    var isPasswordChange : Boolean? = null
 }

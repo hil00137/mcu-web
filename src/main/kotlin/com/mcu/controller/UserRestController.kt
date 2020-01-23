@@ -51,6 +51,7 @@ class UserRestController {
                 return result
             }
             searchUser.password = HashUtil.sha512(user.password)
+            searchUser.isPasswordChange = null
             userService.update(searchUser)
             result["code"] = "success"
             result["url"] = "/user/logout"

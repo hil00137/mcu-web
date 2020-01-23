@@ -128,6 +128,7 @@ class UserService {
         val prop = Properties()
         val pwd =  UUID.randomUUID().toString().replace("-","").substring(0,9)
         user.password = HashUtil.sha512(pwd)
+        user.isPasswordChange = true
         prop["request"] = "resetPwd"
         prop["user"] = user
         prop["ip"] = this.getIp()
