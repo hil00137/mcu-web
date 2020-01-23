@@ -23,6 +23,11 @@ class MailService {
                     mail.setEmailFindFullId(prop["ip"] as String, (prop["user"] as User).userId!!)
                     mailSendUtil.sendEmail(mail)
                 }
+                "errorEmailNotify" -> {
+                    mail.subject = "인증메일 전송에 실패하였습니다"
+                    mail.setEmailChangeFailContent(prop["ip"] as String, prop["failEmail"] as String)
+                    mailSendUtil.sendEmail(mail)
+                }
                 else -> {
 
                 }

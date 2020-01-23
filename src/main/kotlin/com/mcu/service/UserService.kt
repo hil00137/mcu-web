@@ -66,12 +66,12 @@ class UserService {
     }
 
     fun errorEmailNotify(user: User, failEmail : String, ip : String) {
-        Thread {
-            val mail = Mail(user)
-            mail.subject = "인증메일 전송에 실패하였습니다"
-            mail.setEmailChangeFailContent(ip, failEmail)
-            mailSendUtil.sendEmail(mail)
-        }.start()
+        val prop = Properties()
+        prop["request"] = "errorEmailNotify"
+        prop["user"] = user
+        prop["ip"] = ip
+        prop["failEmail"] = failEmail
+        mailService.sendEmail(prop)
     }
 
     fun registerUser(user: User): User? {
