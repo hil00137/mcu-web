@@ -134,6 +134,7 @@
                         if (value.data.code === "success") {
                             alert(value.data.message);
                             this.message = '';
+                            location.href = "login"
                         } else if (value.data.code === "fail") {
                             this.message = value.data.message;
                         }
