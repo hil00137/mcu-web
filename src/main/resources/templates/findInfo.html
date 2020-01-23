@@ -98,10 +98,6 @@
                     }
                 },
                 findMyPwd : function() {
-                    if (!confirm("비밀번호를 초기화 하시겠습니까?")) {
-                        return;
-                    }
-
                     this.findEmail = this.findEmail.trim();
                     this.checkEmail = this.findEmail;
                     if (this.checkEmail === '') {
@@ -118,6 +114,10 @@
                     this.checkId = this.findId;
                     if (this.checkId === '') {
                         alert("아이디가 비어있습니다.");
+                        return;
+                    }
+
+                    if (!confirm("비밀번호를 초기화 하시겠습니까?")) {
                         return;
                     }
 
