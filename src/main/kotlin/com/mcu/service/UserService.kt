@@ -1,7 +1,6 @@
 package com.mcu.service
 
 import com.mcu.model.HistoryPriority
-import com.mcu.model.Mail
 import com.mcu.model.User
 import com.mcu.repository.UserRepository
 import com.mcu.util.HashUtil
@@ -16,6 +15,9 @@ import java.util.*
 
 @Service
 class UserService {
+
+    @Autowired
+    private lateinit var mailService : MailService
 
     @Autowired
     private lateinit var mailSendUtil: MailSendUtil
@@ -40,58 +42,63 @@ class UserService {
 
     fun sendEmailChangeMail(user : User, oriEmail : String): User? {
         user.mailAuthCode = UUID.randomUUID().toString().replace("-","").substring(0,9)
-        val ip = this.getIp()
-        Thread {
-            val mail = Mail(user)
-            mail.subject = "마크대학 이메일 인증메일입니다"
-            mail.setEmailChangeContent(ip, homepageUrl, user)
-            val resultMap = mailSendUtil.sendEmail(mail)
-            val targetUser = this.getUserByUserId(user.userId?:"")?:User()
-
-            if(resultMap["result"] == "success") {
-                targetUser.mailAuth = "wait"
-            } else if(resultMap["result"] == "fail") {
-                val failEmail = targetUser.email
-                historyService.writeHistoryAsAdmin("Email Change Fail $oriEmail -> $failEmail", HistoryPriority.ERROR)
-                targetUser.mailAuth = "success"
-                targetUser.email = oriEmail
-                this.errorEmailNotify(targetUser, failEmail?:"", ip)
-            }
-            userRepository.save(targetUser)
-        }.start()
+        val prop = Properties()
+        prop["ip"] = this.getIp()
+        prop["request"] = "emailChangeMail"
+        prop["url"] = homepageUrl
+        prop["oriEmail"] = oriEmail
+        prop["user"] = user
+        mailService.sendEmail(prop)
         return userRepository.save(user)
     }
 
+    fun sendEmailChangeMailResult(result : HashMap<String, String>) {
+        val targetUser = this.getUserByUserId(result["userId"]!!)?:User()
+        val oriEmail = result["oriEmail"]
+        val ip = result["ip"]
+        if(result["result"] == "success") {
+            targetUser.mailAuth = "wait"
+        } else if(result["result"] == "fail") {
+            val failEmail = targetUser.email
+            historyService.writeHistoryAsAdmin("Email Change Fail $oriEmail -> $failEmail", HistoryPriority.ERROR)
+            targetUser.mailAuth = "success"
+            targetUser.email = oriEmail
+            this.errorEmailNotify(targetUser, failEmail?:"", ip?:"")
+        }
+        userRepository.save(targetUser)
+    }
+
     fun errorEmailNotify(user: User, failEmail : String, ip : String) {
-        Thread {
-            val mail = Mail(user)
-            mail.subject = "인증메일 전송에 실패하였습니다"
-            mail.setEmailChangeFailContent(ip, failEmail)
-            mailSendUtil.sendEmail(mail)
-        }.start()
+        val prop = Properties()
+        prop["request"] = "errorEmailNotify"
+        prop["user"] = user
+        prop["ip"] = ip
+        prop["failEmail"] = failEmail
+        mailService.sendEmail(prop)
     }
 
     fun registerUser(user: User): User? {
         user.password = HashUtil.sha512(user.password)
         user.mailAuthCode = UUID.randomUUID().toString().replace("-","").substring(0,9)
-        val ip = this.getIp()
-        Thread {
-            val mail = Mail(user)
-            mail.subject = "마크대학 이메일 인증메일입니다"
-            mail.setEmailAuthContent(ip, homepageUrl, user)
-            val resultMap = mailSendUtil.sendEmail(mail)
-            val targetUser = this.getUserByUserId(user.userId?:"")?:User()
-
-            if(resultMap["result"] == "success") {
-                targetUser.mailAuth = "wait"
-            } else if(resultMap["result"] == "fail") {
-                targetUser.mailAuth = "fail"
-                targetUser.mailAuthCode = null
-                targetUser.mailAuthFailReason = resultMap["message"]
-            }
-            userRepository.save(targetUser)
-        }.start()
+        val prop = Properties()
+        prop["ip"] = this.getIp()
+        prop["request"] = "registerMail"
+        prop["url"] = homepageUrl
+        prop["user"] = user
+        mailService.sendEmail(prop)
         return userRepository.save(user)
+    }
+
+    fun registerUserResult(result : HashMap<String, String>) {
+        val targetUser = this.getUserByUserId(result["userId"]!!)?:User()
+        if(result["result"] == "success") {
+            targetUser.mailAuth = "wait"
+        } else if(result["result"] == "fail") {
+            targetUser.mailAuth = "fail"
+            targetUser.mailAuthCode = null
+            targetUser.mailAuthFailReason = result["message"]
+        }
+        userRepository.save(targetUser)
     }
 
     fun getIp() : String {
@@ -107,5 +114,13 @@ class UserService {
         user.mailAuth = "success"
         user.mailAuthCode = null
         userRepository.save(user)
+    }
+
+    fun findFullId(user : User) {
+        val prop = Properties()
+        prop["request"] = "findFullId"
+        prop["user"] = user
+        prop["ip"] = this.getIp()
+        mailService.sendEmail(prop)
     }
 }

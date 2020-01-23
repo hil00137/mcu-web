@@ -33,7 +33,11 @@ class HistoryService {
      */
     fun writeHistory(message: String, priority : HistoryPriority) {
         val history = History()
-        val userId  = SecurityContextHolder.getContext().authentication.principal as String
+        val userId  = try {
+            SecurityContextHolder.getContext().authentication.principal as String
+        } catch (e : Exception) {
+            "UNKNOWN"
+        }
         history.userId = userId
         val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
         var ip: String? = request.getHeader("X-FORWARDED-FOR")

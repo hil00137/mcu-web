@@ -37,34 +37,33 @@ class Mail() {
     }
 
     fun setEmailAuthContent(ip : String, url : String, user: User) {
-        val userId = HashUtil.encryptAES256(user.userId?:"")
-        val mailAuthCode = HashUtil.encryptAES256(user.mailAuthCode!!)
+        this.subject = "마크대학 이메일 인증메일입니다"
         val stringBuilder = StringBuilder()
         stringBuilder.append("<html><body>$NEW_LINE")
         stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")
         stringBuilder.append("${ip}로부터 ${this.toName}님의 회원가입을 요청하였습니다. $brTag$NEW_LINE")
         stringBuilder.append("본인이 맞으시다면 아래 URL을 클릭해주시길 바랍니다.$brTag$NEW_LINE")
-        stringBuilder.append("<a href=\"${url}/user/emailAuth?userId=${userId}&emailAuthCode=${mailAuthCode}\">메일 인증하기</a>$brTag$NEW_LINE")
+        stringBuilder.append("<a href=\"${this.getAuthUrl(url, user)}\">메일 인증하기</a>$brTag$NEW_LINE")
         stringBuilder.append("감사합니다.$brTag$NEW_LINE")
         stringBuilder.append("</body></html>$NEW_LINE")
         this.content = stringBuilder.toString()
     }
 
     fun setEmailChangeContent(ip : String, url : String, user: User) {
-        val userId = HashUtil.encryptAES256(user.userId?:"")
-        val mailAuthCode = HashUtil.encryptAES256(user.mailAuthCode!!)
+        this.subject = "마크대학 이메일 인증메일입니다"
         val stringBuilder = StringBuilder()
         stringBuilder.append("<html><body>$NEW_LINE")
         stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")
         stringBuilder.append("${ip}로부터 ${this.toName}님의 메일변경을 요청하였습니다. $brTag$NEW_LINE")
         stringBuilder.append("본인이 맞으시다면 아래 URL을 클릭해주시길 바랍니다.$brTag$NEW_LINE")
-        stringBuilder.append("<a href=\"${url}/user/emailAuth?userId=${userId}&emailAuthCode=${mailAuthCode}\">메일 인증하기</a>$brTag$NEW_LINE")
+        stringBuilder.append("<a href=\"${this.getAuthUrl(url, user)}\">메일 인증하기</a>$brTag$NEW_LINE")
         stringBuilder.append("감사합니다.$brTag$NEW_LINE")
         stringBuilder.append("</body></html>$NEW_LINE")
         this.content = stringBuilder.toString()
     }
 
     fun setEmailChangeFailContent(ip : String, email : String) {
+        this.subject = "인증메일 전송에 실패하였습니다"
         val stringBuilder = StringBuilder()
         stringBuilder.append("<html><body>$NEW_LINE")
         stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")
@@ -117,5 +116,23 @@ class Mail() {
         }
         stringBuilder.append("</body></html>")
         this.content = stringBuilder.toString()
+    }
+
+    fun setEmailFindFullId(ip : String, userId : String) {
+        this.subject = "마크대학 아이디 찾기 메일입니다."
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("<html><body>$NEW_LINE")
+        stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")
+        stringBuilder.append("${ip}로부터 ${this.toName}님의 아이디를 요청하였습니다. $brTag$NEW_LINE")
+        stringBuilder.append("${this.toName}님의 아이디는 [ <U>$userId</U> ] 입니다. $brTag$NEW_LINE")
+        stringBuilder.append("감사합니다.$brTag$NEW_LINE")
+        stringBuilder.append("</body></html>")
+        this.content = stringBuilder.toString()
+    }
+
+    private fun getAuthUrl(url : String, user: User): String {
+        val userId = HashUtil.encryptAES256(user.userId?:"")
+        val mailAuthCode = HashUtil.encryptAES256(user.mailAuthCode!!)
+        return "${url}/user/emailAuth?userId=${userId}&emailAuthCode=${mailAuthCode}"
     }
 }

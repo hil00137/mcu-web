@@ -1,16 +1,15 @@
 package com.mcu.controller
 
 import com.mcu.model.HistoryPriority
-import com.mcu.model.User
 import com.mcu.service.HistoryService
 import com.mcu.service.UserService
 import com.mcu.util.HashUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.*
-import java.net.URLDecoder
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletRequest
 
 @Controller
@@ -46,48 +45,9 @@ class UserController {
         return "user/info"
     }
 
-    @ResponseBody
-    @PostMapping("/signUp")
-    fun signUp(@RequestBody user: User?) : String {
-        user?.let {
-            userService.registerUser(it)?:"saved error"
-        }?: return "error"
-        historyService.writeHistory("Sign Up ${user.userId}",HistoryPriority.SYSTEM)
-        return "OK"
-    }
-
-    @ResponseBody
-    @GetMapping("/checkId/{userId}")
-    fun idCheck(@PathVariable userId : String) : String {
-        val user = userService.getUserByUserId(userId)
-        return if (user == null) {
-            "OK"
-        } else {
-            "NO"
-        }
-    }
-
-    @ResponseBody
-    @GetMapping("/checkNickname/{nickname}")
-    fun nicknameCheck(@PathVariable nickname : String) : String {
-        val decodeNickname = URLDecoder.decode(nickname,"UTF-8")
-        val user = userService.getUserByNickname(decodeNickname)
-        return if (user == null) {
-            "OK"
-        } else {
-            "NO"
-        }
-    }
-
-    @ResponseBody
-    @GetMapping("/checkEmail/{email}")
-    fun mailCheck(@PathVariable email : String) : String {
-        val user = userService.getUserByEmail(email)
-        return if (user == null) {
-            "OK"
-        } else {
-            "NO"
-        }
+    @GetMapping("/findInfo")
+    fun goFindInfoPage() : String {
+        return "findInfo"
     }
 
     @GetMapping("/emailAuth")
@@ -118,85 +78,5 @@ class UserController {
             request.setAttribute("errorMessage", "인증에 실패하였습니다.")
         }
         return "login"
-    }
-
-    @ResponseBody
-    @GetMapping("/info/detail/{id}")
-    fun getUserDetail(@PathVariable id : String): HashMap<String, String> {
-        val user = userService.getUserByUserId(id)
-        val result = HashMap<String, String>()
-        result["nickname"] = user?.nickname?:""
-        result["email"] = user?.email?:""
-        return result
-    }
-
-    @ResponseBody
-    @PostMapping("/info/checkPassword")
-    fun isPasswordOk(@RequestBody user : User): HashMap<String, String> {
-        val requestUserId = user.userId?:""
-        val loginUserId = SecurityContextHolder.getContext().authentication.principal as String
-        val result = HashMap<String, String>()
-        if (requestUserId != loginUserId) {
-            historyService.writeHistory("Access is not allowed.[password check] from $loginUserId", HistoryPriority.RULE_OVER)
-            result["code"] = "fail"
-            result["message"] = "잘못된 접근입니다."
-            return result
-        }
-        val searchUser = userService.getUserByUserId(requestUserId)!!
-        if(HashUtil.sha512(user.password) != searchUser.password) {
-            result["code"] = "fail"
-            result["message"] = "비밀번호가 틀렸습니다."
-            return result
-        }
-        result["code"] = "success"
-        return result
-    }
-
-    @ResponseBody
-    @PutMapping("/info/change")
-    fun changeInfo(@RequestBody user : User) : HashMap<String, String> {
-        val requestUserId = user.userId?:""
-        val loginUserId = SecurityContextHolder.getContext().authentication.principal as String
-        val result = HashMap<String, String>()
-        if (requestUserId != loginUserId) {
-            historyService.writeHistory("Access is not allowed.[info Change] from $loginUserId", HistoryPriority.RULE_OVER)
-            result["code"] = "fail"
-            result["message"] = "잘못된 접근입니다."
-            return result
-        }
-        val searchUser = userService.getUserByUserId(requestUserId)!!
-
-        if (user.nickname != searchUser.nickname) {
-            historyService.writeHistory("Nickname Change ${searchUser.nickname} -> ${user.nickname}", HistoryPriority.USER_REQUEST)
-            searchUser.nickname = user.nickname
-            userService.update(searchUser)
-            result["code"] = "success"
-            result["url"] = "/user/info"
-            result["message"] = "닉네임 변경이 완료되었습니다."
-        }
-
-        if (user.password != "") {
-            if(searchUser.password == HashUtil.sha512(user.password)) {
-                result["code"] = "fail"
-                result["message"] = "비밀번호가 같습니다."
-                return result
-            }
-            searchUser.password = HashUtil.sha512(user.password)
-            userService.update(searchUser)
-            result["code"] = "success"
-            result["url"] = "/user/logout"
-            result["message"] = "비밀번호 변경이 완료되었습니다. 다시 로그인해주시길 바랍니다."
-        }
-
-        if (user.email != searchUser.email) {
-            historyService.writeHistory("Email Change ${searchUser.email} -> ${user.email}", HistoryPriority.USER_REQUEST)
-            val oriEmail = searchUser.email!!
-            searchUser.email = user.email
-            userService.sendEmailChangeMail(searchUser, oriEmail)
-            result["code"] = "success"
-            result["url"] = "/user/logout"
-            result["message"] = "이메일을 변경하였습니다. 인증메일 확인후 다시 로그인해주시길 바랍니다."
-        }
-        return result
     }
 }
