@@ -130,6 +130,18 @@ class Mail() {
         this.content = stringBuilder.toString()
     }
 
+    fun setEmailResetPassword(ip: String, pwd : String) {
+        this.subject = "마크대학 비밀번호 초기화 메일입니다."
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("<html><body>$NEW_LINE")
+        stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")
+        stringBuilder.append("${ip}로부터 ${this.toName}님의 비밀번호 초기화를 요청하였습니다. $brTag$NEW_LINE")
+        stringBuilder.append("${this.toName}님의 임시 비밀번호는 [ <U>$pwd</U> ] 입니다. $brTag$NEW_LINE")
+        stringBuilder.append("감사합니다.$brTag$NEW_LINE")
+        stringBuilder.append("</body></html>")
+        this.content = stringBuilder.toString()
+    }
+
     private fun getAuthUrl(url : String, user: User): String {
         val userId = HashUtil.encryptAES256(user.userId?:"")
         val mailAuthCode = HashUtil.encryptAES256(user.mailAuthCode!!)

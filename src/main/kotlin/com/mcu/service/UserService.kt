@@ -123,4 +123,16 @@ class UserService {
         prop["ip"] = this.getIp()
         mailService.sendEmail(prop)
     }
+
+    fun resetPassword(user : User) {
+        val prop = Properties()
+        val pwd =  UUID.randomUUID().toString().replace("-","").substring(0,9)
+        user.password = HashUtil.sha512(pwd)
+        prop["request"] = "resetPwd"
+        prop["user"] = user
+        prop["ip"] = this.getIp()
+        prop["pwd"] = pwd
+        userRepository.save(user)
+        mailService.sendEmail(prop)
+    }
 }
