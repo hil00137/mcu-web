@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
+import java.util.*
+import kotlin.collections.HashMap
 
 @RestController
 @RequestMapping("/user")
@@ -135,5 +137,32 @@ class UserRestController {
         }?: return "error"
         historyService.writeHistory("Sign Up ${user.userId}",HistoryPriority.SYSTEM)
         return "OK"
+    }
+
+    @PostMapping("/findInfo/id")
+    fun findMyId(@RequestBody param : Properties) : HashMap<String, String> {
+        val email = (param["email"] as String?)?:""
+        val user = userService.getUserByEmail(email)
+        val result = HashMap<String, String>()
+        if(user == null) {
+            result["code"] = "fail"
+            result["message"] = "존재하지 않는 회원입니다. 이메일을 확인하거나, 회원가입을 해주시길 바랍니다."
+            return result
+        }
+
+        result["code"] = "success"
+
+        val stringBuilder = StringBuilder()
+        (user.userId ?: "").forEachIndexed { index, c ->
+            if (index < user.userId!!.length/2) {
+                stringBuilder.append(c)
+            } else {
+                stringBuilder.append('*')
+            }
+        }
+
+        result["userId"] = stringBuilder.toString()
+
+        return result
     }
 }
