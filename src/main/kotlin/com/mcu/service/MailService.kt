@@ -35,9 +35,15 @@ class MailService {
                     mail.setEmailChangeContent(ip, prop["url"] as String, user)
                     val resultMap = mailSendUtil.sendEmail(mail)
                     resultMap["oriEmail"] = prop["oriEmail"] as String
-                    resultMap["ip"] = prop["ip"] as String
+                    resultMap["ip"] = ip
                     resultMap["userId"] = user.userId?:""
-                    userService.sendEmailChangeMailResult(resultMap, user)
+                    userService.sendEmailChangeMailResult(resultMap)
+                }
+                "registerMail" -> {
+                    mail.setEmailAuthContent(ip, prop["url"] as String, user)
+                    val resultMap = mailSendUtil.sendEmail(mail)
+                    resultMap["userId"] = user.userId?:""
+                    userService.registerUserResult(resultMap)
                 }
                 else -> {
 

@@ -37,6 +37,7 @@ class Mail() {
     }
 
     fun setEmailAuthContent(ip : String, url : String, user: User) {
+        this.subject = "마크대학 이메일 인증메일입니다"
         val stringBuilder = StringBuilder()
         stringBuilder.append("<html><body>$NEW_LINE")
         stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")

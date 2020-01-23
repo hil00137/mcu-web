@@ -1,7 +1,6 @@
 package com.mcu.service
 
 import com.mcu.model.HistoryPriority
-import com.mcu.model.Mail
 import com.mcu.model.User
 import com.mcu.repository.UserRepository
 import com.mcu.util.HashUtil
@@ -53,8 +52,8 @@ class UserService {
         return userRepository.save(user)
     }
 
-    fun sendEmailChangeMailResult(result : HashMap<String, String>, user : User) {
-        val targetUser = this.getUserByUserId(result["userId"]!!)?:return
+    fun sendEmailChangeMailResult(result : HashMap<String, String>) {
+        val targetUser = this.getUserByUserId(result["userId"]!!)?:User()
         val oriEmail = result["oriEmail"]
         val ip = result["ip"]
         if(result["result"] == "success") {
@@ -81,24 +80,25 @@ class UserService {
     fun registerUser(user: User): User? {
         user.password = HashUtil.sha512(user.password)
         user.mailAuthCode = UUID.randomUUID().toString().replace("-","").substring(0,9)
-        val ip = this.getIp()
-        Thread {
-            val mail = Mail(user)
-            mail.subject = "마크대학 이메일 인증메일입니다"
-            mail.setEmailAuthContent(ip, homepageUrl, user)
-            val resultMap = mailSendUtil.sendEmail(mail)
-            val targetUser = this.getUserByUserId(user.userId?:"")?:User()
-
-            if(resultMap["result"] == "success") {
-                targetUser.mailAuth = "wait"
-            } else if(resultMap["result"] == "fail") {
-                targetUser.mailAuth = "fail"
-                targetUser.mailAuthCode = null
-                targetUser.mailAuthFailReason = resultMap["message"]
-            }
-            userRepository.save(targetUser)
-        }.start()
+        val prop = Properties()
+        prop["ip"] = this.getIp()
+        prop["request"] = "registerMail"
+        prop["url"] = homepageUrl
+        prop["user"] = user
+        mailService.sendEmail(prop)
         return userRepository.save(user)
+    }
+
+    fun registerUserResult(result : HashMap<String, String>) {
+        val targetUser = this.getUserByUserId(result["userId"]!!)?:User()
+        if(result["result"] == "success") {
+            targetUser.mailAuth = "wait"
+        } else if(result["result"] == "fail") {
+            targetUser.mailAuth = "fail"
+            targetUser.mailAuthCode = null
+            targetUser.mailAuthFailReason = result["message"]
+        }
+        userRepository.save(targetUser)
     }
 
     fun getIp() : String {
