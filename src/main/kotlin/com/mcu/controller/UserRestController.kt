@@ -165,4 +165,21 @@ class UserRestController {
 
         return result
     }
+
+    @PostMapping("/findInfo/fullId")
+    fun findMyFullId(@RequestBody param : Properties) : HashMap<String, String> {
+        val email = (param["email"] as String?)?:""
+        val user = userService.getUserByEmail(email)
+        val result = HashMap<String, String>()
+        if(user == null) {
+            result["code"] = "fail"
+            result["message"] = "잘못된 접근입니다."
+            historyService.writeHistory("Access is not allowed.[find Id] from UNKNWON", HistoryPriority.RULE_OVER)
+            return result
+        }
+        userService.findFullId(user)
+        result["code"] = "success"
+        result["message"] = "이메일을 확인해주시길 바랍니다.(스팸메시지함도 확인해주시길 바랍니다.)"
+        return result
+    }
 }

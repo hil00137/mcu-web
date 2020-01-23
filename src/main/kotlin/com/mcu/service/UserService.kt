@@ -18,6 +18,9 @@ import java.util.*
 class UserService {
 
     @Autowired
+    private lateinit var mailService : MailService
+
+    @Autowired
     private lateinit var mailSendUtil: MailSendUtil
 
     @Value("\${homepage.address}")
@@ -107,5 +110,13 @@ class UserService {
         user.mailAuth = "success"
         user.mailAuthCode = null
         userRepository.save(user)
+    }
+
+    fun findFullId(user : User) {
+        val prop = Properties()
+        prop["request"] = "findFullId"
+        prop["user"] = user
+        prop["ip"] = this.getIp()
+        mailService.sendEmail(prop)
     }
 }

@@ -118,4 +118,15 @@ class Mail() {
         stringBuilder.append("</body></html>")
         this.content = stringBuilder.toString()
     }
+
+    fun setEmailFindFullId(ip : String, userId : String) {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("<html><body>$NEW_LINE")
+        stringBuilder.append("안녕하세요. 마크대학입니다. $brTag$NEW_LINE")
+        stringBuilder.append("${ip}로부터 ${this.toName}님의 아이디를 요청하였습니다. $brTag$NEW_LINE")
+        stringBuilder.append("${this.toName}님의 아이디는 [ <U>$userId</U> ] 입니다. $brTag$NEW_LINE")
+        stringBuilder.append("감사합니다.$brTag$NEW_LINE")
+        stringBuilder.append("</body></html>")
+        this.content = stringBuilder.toString()
+    }
 }
