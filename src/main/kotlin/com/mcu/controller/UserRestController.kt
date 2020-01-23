@@ -97,6 +97,7 @@ class UserRestController {
         val result = HashMap<String, String>()
         result["nickname"] = user?.nickname?:""
         result["email"] = user?.email?:""
+        result["isPasswordChange"] = user?.isPasswordChange.toString()
         return result
     }
 
