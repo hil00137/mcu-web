@@ -188,7 +188,7 @@ class UserRestController {
 
     @PostMapping("/findInfo/pwd")
     fun resetMyPassword(@RequestBody param : Properties) : HashMap<String, String> {
-        val email = (param["email"] as String)?:""
+        val email = (param["email"] as String)
         val id = (param["id"] as String)
         val user = userService.getUserByEmail(email)
         val result = HashMap<String, String>()
