@@ -13,14 +13,18 @@ class MailService {
     @Autowired
     private lateinit var mailSendUtil: MailSendUtil
 
+    @Autowired
+    private lateinit var userService: UserService
+
     fun sendEmail(prop : Properties) {
-        println(prop)
+        val user = prop["user"] as User
+
         Thread {
-            val mail = Mail(prop["user"] as User)
-            when(prop["request"]) {
+            val mail = Mail(user)
+            when (prop["request"]) {
                 "findFullId" -> {
                     mail.subject = "마크대학 아이디 찾기 메일입니다."
-                    mail.setEmailFindFullId(prop["ip"] as String, (prop["user"] as User).userId!!)
+                    mail.setEmailFindFullId(prop["ip"] as String, user.userId!!)
                     mailSendUtil.sendEmail(mail)
                 }
                 "errorEmailNotify" -> {
@@ -28,10 +32,20 @@ class MailService {
                     mail.setEmailChangeFailContent(prop["ip"] as String, prop["failEmail"] as String)
                     mailSendUtil.sendEmail(mail)
                 }
+                "emailChangeMail" -> {
+                    mail.subject = "마크대학 이메일 인증메일입니다"
+                    mail.setEmailChangeContent(prop["ip"] as String, prop["url"] as String, user)
+                    val resultMap = mailSendUtil.sendEmail(mail)
+                    resultMap["oriEmail"] = prop["oriEmail"] as String
+                    resultMap["ip"] = prop["ip"] as String
+                    resultMap["userId"] = user.userId?:""
+                    userService.sendEmailChangeMailResult(resultMap, user)
+                }
                 else -> {
 
                 }
             }
+
         }.start()
     }
 }

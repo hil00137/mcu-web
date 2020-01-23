@@ -43,26 +43,30 @@ class UserService {
 
     fun sendEmailChangeMail(user : User, oriEmail : String): User? {
         user.mailAuthCode = UUID.randomUUID().toString().replace("-","").substring(0,9)
-        val ip = this.getIp()
-        Thread {
-            val mail = Mail(user)
-            mail.subject = "마크대학 이메일 인증메일입니다"
-            mail.setEmailChangeContent(ip, homepageUrl, user)
-            val resultMap = mailSendUtil.sendEmail(mail)
-            val targetUser = this.getUserByUserId(user.userId?:"")?:User()
-
-            if(resultMap["result"] == "success") {
-                targetUser.mailAuth = "wait"
-            } else if(resultMap["result"] == "fail") {
-                val failEmail = targetUser.email
-                historyService.writeHistoryAsAdmin("Email Change Fail $oriEmail -> $failEmail", HistoryPriority.ERROR)
-                targetUser.mailAuth = "success"
-                targetUser.email = oriEmail
-                this.errorEmailNotify(targetUser, failEmail?:"", ip)
-            }
-            userRepository.save(targetUser)
-        }.start()
+        val prop = Properties()
+        prop["ip"] = this.getIp()
+        prop["request"] = "emailChangeMail"
+        prop["url"] = homepageUrl
+        prop["oriEmail"] = oriEmail
+        prop["user"] = user
+        mailService.sendEmail(prop)
         return userRepository.save(user)
+    }
+
+    fun sendEmailChangeMailResult(result : HashMap<String, String>, user : User) {
+        val targetUser = this.getUserByUserId(result["userId"]!!)?:return
+        val oriEmail = result["oriEmail"]
+        val ip = result["ip"]
+        if(result["result"] == "success") {
+            targetUser.mailAuth = "wait"
+        } else if(result["result"] == "fail") {
+            val failEmail = targetUser.email
+            historyService.writeHistoryAsAdmin("Email Change Fail $oriEmail -> $failEmail", HistoryPriority.ERROR)
+            targetUser.mailAuth = "success"
+            targetUser.email = oriEmail
+            this.errorEmailNotify(targetUser, failEmail?:"", ip?:"")
+        }
+        userRepository.save(targetUser)
     }
 
     fun errorEmailNotify(user: User, failEmail : String, ip : String) {
