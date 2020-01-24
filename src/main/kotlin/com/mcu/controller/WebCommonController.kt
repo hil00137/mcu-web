@@ -17,7 +17,7 @@ class WebCommonController {
         val loginUserId = SecurityContextHolder.getContext().authentication.principal as String
         val user = userService.getUserByUserId(loginUserId)
         if(user?.isPasswordChange == true) {
-            return "user/info"
+            return "redirect:user/info"
         }
         return "home"
     }

@@ -6,6 +6,8 @@ import com.mcu.service.UserService
 import com.mcu.util.HashUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -27,6 +29,10 @@ class UserController {
 
     @GetMapping("/login")
     fun goLoginPage() : String {
+        val authorities = SecurityContextHolder.getContext().authentication.authorities
+        if(!authorities.contains(SimpleGrantedAuthority("ROLE_ANONYMOUS"))) {
+            return "redirect:home"
+        }
         return "login"
     }
 
