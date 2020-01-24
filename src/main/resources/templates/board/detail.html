@@ -18,7 +18,8 @@
         </ul>
         <div class="page-header col-xs-12" id="board-subject">
             <h1 th:text="${board.getSubject()}"></h1>
-            <small th:text="'조회수 : ' + ${board.getHit()}"></small>
+            <small th:text="'조회수 : ' + ${board.getHit()}"></small><br>
+            <small th:text="'작성자 : ' + ${board.getNickname()}">작성자</small>
         </div>
         <div class="page-item col-xs-12" id="board-content" th:text="${board.getContent()}">
         </div>
