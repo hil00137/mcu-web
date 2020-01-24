@@ -34,7 +34,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http?:return
         http.authorizeRequests()
                 .antMatchers("/","/user/login","/user/signUp","/error**","/static/**","/js/**","/css/**").permitAll()
-                .antMatchers("/user/check**/**","/user/emailAuth*","/user/findInfo**/**","/document/**").permitAll()
+                .antMatchers("/user/check**/**","/user/emailAuth*","/user/findInfo**/**","/document/**","/board/detail/**").permitAll()
+                .antMatchers("/comment/**").permitAll()
                 .antMatchers("/migration/**").permitAll()
                 .antMatchers("/**").access("ROLE_USER")
                 .antMatchers("/**").access("ROLE_ADMIN")
