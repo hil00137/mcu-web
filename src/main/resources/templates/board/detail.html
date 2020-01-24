@@ -34,7 +34,7 @@
 
         <div class="col-xs-12" style="margin-top: 20px">
             <ul class="media-list" id="commentVue">
-                <li class="media">
+                <li class="media" sec:authorize="!hasRole('ROLE_ANONYMOUS')">
                     <div class="media-body">
                         <textarea v-model="commentInput" rows="3" placeholder="댓글을 입력해 주세요."
                                   class="well well-sm" maxlength="6000" style="width: 100%; line-height: 14px; height: 60px;"></textarea>
