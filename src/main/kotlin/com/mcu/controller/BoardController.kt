@@ -2,6 +2,7 @@ package com.mcu.controller
 
 import com.mcu.model.BoardType
 import com.mcu.service.BoardService
+import com.mcu.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
@@ -16,6 +17,9 @@ class BoardController {
     @Autowired
     lateinit var boardService : BoardService
 
+    @Autowired
+    lateinit var userService : UserService
+
 
     /**
      * board detail page
@@ -25,6 +29,7 @@ class BoardController {
         var targetBoard = boardService.getBoardById(id)
         if(targetBoard != null) {
             val userId = SecurityContextHolder.getContext().authentication.principal as String
+            targetBoard.nickname = userService.getUserByUserId(targetBoard.userId)?.nickname?:""
             boardService.hitCount(targetBoard, userId)
         }
         return ModelAndView("board/detail").addObject("board", targetBoard)
