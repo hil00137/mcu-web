@@ -44,6 +44,16 @@
         </div>
         <div class="col-sm-offset-2"><p style="margin-left: 1%" :class="emailMessageClass">{{emailMessage}}</p></div>
         <div class="col-sm-offset-2"><p style="margin-left: 1%" class="text-info">이메일은 각종 정보성 내용을 발송 하는데 사용됩니다.</p></div>
+        <div class="col-sm-offset-2"><input type="checkbox" id="communityCheck">이용약관에 동의(필수)</input></div>
+        <div class="col-sm-offset-2 col-sm-10">
+            <iframe th:src="@{/document/communty.html}" style="height: 10%; width: 80%;">
+            </iframe>
+        </div>
+        <div class="col-sm-offset-2"><input type="checkbox" id="informationCheck">개인정보 수집 동의(필수)</input></div>
+        <div class="col-sm-offset-2 col-sm-10">
+            <iframe th:src="@{/document/information.html}" style="height: 10%; width: 80%;">
+            </iframe>
+        </div>
         <div class="form-group">
             <button class="col-sm-offset-3 col-sm-6 btn btn-primary">가입하기</button>
         </div>
@@ -209,6 +219,14 @@
                         this.submitMessage = "입력되지 않은 항목이 있습니다.";
                         return false;
                     } else {
+                        if(!document.getElementById("communityCheck").checked) {
+                            alert("이용약관에 동의해주시길 바랍니다.");
+                            return;
+                        }
+                        if(!document.getElementById("informationCheck").checked) {
+                            alert("개인정보제공에 동의해주시길 바랍니다.");
+                            return;
+                        }
                         axios.post('/user/signUp', {
                                 userId : this.userId,
                                 nickname : this.nickname,
@@ -235,7 +253,7 @@
                 }
 
             }
-        })
+        });
     </script>
 </th:block>
 </body>
