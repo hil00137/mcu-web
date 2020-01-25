@@ -35,11 +35,13 @@ class BoardService {
      */
     fun getCountOfBoard(type : BoardType) = boardRepository.countByType(type.type)
 
+    fun getCountOfMine(userId : String) = boardRepository.countByUserId(userId)
+
     /**
      * 해당 게시판의 해당 페이지 게시글
      */
-    @Cacheable(value = ["boardCache"])
-    fun getBoards(type : BoardType, page : Int): MutableList<Board> {
+    @Cacheable(value = ["boardListCache"])
+    fun getBoardsByType(type : BoardType, page : Int): MutableList<Board> {
         var resultPage : QueryResultPage<Board>? = null
         for (i in 0 .. page) {
             val last = resultPage?.lastEvaluatedKey?:HashMap<String, AttributeValue>()
@@ -50,6 +52,27 @@ class BoardService {
 
         list?.forEach {
             it.userId.let { userId -> it.nickname = userService.getUserByUserId(userId)?.nickname?:"" }
+            it.regist?.let { regist -> it.formattedRegist = DateUtil.transform(regist)  }
+            it.update?.let { update -> it.formattedUpdate = DateUtil.transform(update)  }
+        }
+        return list?: ArrayList()
+    }
+
+    /**
+     * 해당 유저 해당 페이지 게시글
+     */
+    @Cacheable(value = ["boardListCache"])
+    fun getBoardsByUserId(userId: String, page : Int): MutableList<Board> {
+        var resultPage : QueryResultPage<Board>? = null
+        for (i in 0 .. page) {
+            val last = resultPage?.lastEvaluatedKey?:HashMap<String, AttributeValue>()
+            resultPage = boardRepository.findByUserIdWithPage(userId, last)
+        }
+
+        val list = resultPage?.results
+
+        list?.forEach {
+            it.type.let { type -> it.krType = BoardType.valueOf(type.toUpperCase()).kr }
             it.regist?.let { regist -> it.formattedRegist = DateUtil.transform(regist)  }
             it.update?.let { update -> it.formattedUpdate = DateUtil.transform(update)  }
         }

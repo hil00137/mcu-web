@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="~{layout/afterLogin.html}">
+      layout:decorator="~{layout/afterLogin.html}" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 <head>
 </head>
 <body>
@@ -11,7 +11,7 @@
                 <a href="#" class="list-group-item active" @click="typeChange" id="type_myInfo" value="myInfo">
                     내 정보
                 </a>
-<!--                <a href="#" class="list-group-item" @click="typeChange" id="type_youInfo" value="youInfo">니 정보</a>-->
+                <a href="#" class="list-group-item" @click="typeChange" id="type_myBoard" value="myBoard">내 글 보기</a>
 <!--                <a href="#" class="list-group-item">Morbi leo risus</a>-->
 <!--                <a href="#" class="list-group-item">Porta ac consectetur ac</a>-->
 <!--                <a href="#" class="list-group-item">Vestibulum at eros</a>-->
@@ -75,13 +75,59 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-9" id="youInfo" hidden="hidden" name="infos">
+        <div class="col-sm-9" id="myBoard" hidden="hidden" name="infos">
             <div class="panel panel-primary" id="youInfoPanel">
                 <div class="panel-heading">
-                    <h3 class="panel-title">니정보</h3>
+                    <h3 class="panel-title">내 글 보기</h3>
                 </div>
-                <div class="panel-body">
-                    <input type="button" value="aa">
+
+                <table class="table table-bordered table-hover">
+                    <colgroup>
+                        <col span="1" style="width: 25%">
+                        <col span="1" style="width: 45%">
+                        <col span="1" style="width: 15%">
+                        <col span="1" style="width: 15%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th class="text-center">게시판</th>
+                        <th class="text-center">제목</th>
+                        <th class="text-center">등록일자</th>
+                        <th class="text-center">조회수</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="row in list">
+                        <th class="text-center">{{row.krType}}</th>
+                        <th class="text-center"><a href="#" @click="detailBoard(row.id)">{{row.subject}}</a>
+                            ({{row.commentCount}})
+                        </th>
+                        <th class="text-center">{{row.formattedRegist}}</th>
+                        <th class="text-center">{{row.hit}}</th>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="panel-footer">
+                    <div class="text-center">
+                        <ul class="pagination" style="margin:0">
+                            <li v-bind:class="{ 'disabled':page === 1 }">
+                                <a href="#" aria-label="Previous" @click="getList(1)">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li><a href="#" v-if="page-2 > 0" @click="getList(page-2)">{{page-2}}</a></li>
+                            <li><a href="#" v-if="page-1 > 0" @click="getList(page-1)">{{page-1}}</a></li>
+                            <li class="active"><a href="#" @click="getList(page)">{{page}} <span
+                                    class="sr-only">(current)</span></a></li>
+                            <li><a href="#" v-if="page*10 < count" @click="getList(page+1)">{{page+1}}</a></li>
+                            <li><a href="#" v-if="(page+1)*10 < count" @click="getList(page+2)">{{page+2}}</a></li>
+                            <li v-bind:class="{'disabled':page === lastPage}">
+                                <a href="#" aria-label="Next" @click="getList(lastPage)">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -336,6 +382,47 @@
             mounted : function() {
                 this.userId = document.getElementById("loginUserId").value;
                 this.getUserDetail();
+            }
+        });
+
+        const myBoard = new Vue({
+            el: "#myBoard",
+            data: {
+                id: "",
+                subject: "",
+                page: 1,
+                commentCount : 0,
+                count: 0,
+                lastPage: 0,
+                list: [{
+                    krType: "",
+                    content: "",
+                    subject: "",
+                    hit : "",
+                    formattedRegist: "",
+                    formattedUpdate: ""
+                }
+                ]
+
+            },
+            methods: {
+                getList: function (page) {
+                    const index = page - 1;
+                    axios.get('/board/myBoard/' + index)
+                        .then(value => {
+                            this.list = value.data.list;
+                            this.page = value.data.page + 1;
+                            this.count = value.data.count;
+                            this.lastPage = Math.floor((this.count - 1) / 10) + 1;
+                        })
+                },
+                detailBoard: function (id) {
+                    location.href= "/board/detail/"+id;
+                }
+            }
+            ,
+            mounted: function () {
+                this.getList(1);
             }
         });
     </script>

@@ -51,7 +51,7 @@ class BoardRestController {
 
         val result = HashMap<String, Any>()
         result["count"] = boardService.getCountOfBoard(boardType!!)
-        result["list"] = boardService.getBoards(boardType, pageNum)
+        result["list"] = boardService.getBoardsByType(boardType, pageNum)
         result["page"] = pageNum
         return result
     }
@@ -135,5 +135,28 @@ class BoardRestController {
         oriBoard.update = LocalDateTime.now()
         boardService.saveBoard(oriBoard)
         return "success"
+    }
+
+    /**
+     * 정해진 게시판의 page별로 게시글들을 가져옴. Caching
+     */
+    @GetMapping("/myBoard/{page}")
+    fun getMyBoards(@PathVariable page : String) : Map<String, Any> {
+        logger.info("Get My Boards : page : $page")
+        val requestId = SecurityContextHolder.getContext().authentication.principal as String
+        var pageNum: Int
+        try {
+            pageNum = page.toInt()
+        } catch (e : IllegalArgumentException) {
+            return HashMap()
+        } catch (e : NumberFormatException) {
+            pageNum = 0
+        }
+
+        val result = HashMap<String, Any>()
+        result["count"] = boardService.getCountOfMine(requestId)
+        result["list"] = boardService.getBoardsByUserId(requestId, pageNum)
+        result["page"] = pageNum
+        return result
     }
 }
