@@ -11,6 +11,7 @@
         <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <ul class="nav nav-pills">
             <input type="hidden" id="initBoardType" th:value="${boardType}"/>
+            <input type="hidden" id="initBoardPage" th:value="${page}"/>
             <input type="hidden" id="boardType" v-model="type"/>
             <li role="presentation" id="type_notification" @click="typeChange(event)"><a href="#" value="notification">공지사항</a></li>
             <li role="presentation" id="type_development" @click="typeChange(event)"><a href="#" value="development">개발자 게시판</a></li>
@@ -109,7 +110,16 @@
                             this.page = value.data.page + 1;
                             this.count = value.data.count;
                             this.lastPage = Math.floor((this.count - 1) / 10) + 1;
-                        })
+                            if(typeof(history.pushState) == 'function') {
+                                //현재 주소를 가져온다.
+                                var renewURL = location.href;
+                                renewURL = renewURL.split("?")[0];
+                                renewURL += "?boardType="+this.type;
+                                renewURL += "&page="+ this.page;
+                                //페이지 갱신 실행!
+                                history.pushState(null, null, renewURL);
+                            }
+                        });
                 },
                 deleteBoard: function (id) {
                     axios.delete('/board/' + id, {
@@ -126,12 +136,30 @@
                     );
                 },
                 detailBoard: function (id) {
+                    if(typeof(history.pushState) == 'function') {
+                        //현재 주소를 가져온다.
+                        var renewURL = location.href;
+                        renewURL = renewURL.split("?")[0];
+                        renewURL += "?boardType="+this.type;
+                        renewURL += "&page="+this.page;
+                        //페이지 갱신 실행!
+                        history.pushState(null, null, renewURL);
+                    }
                     location.href= "/board/detail/"+id;
                 },
                 typeChange: function (event) {
                     document.getElementById("type_"+this.type).classList.remove("active");
                     this.type = event.target.getAttribute("value");
                     document.getElementById("type_"+this.type).classList.add("active");
+                    if(typeof(history.pushState) == 'function') {
+                        //현재 주소를 가져온다.
+                        var renewURL = location.href;
+                        renewURL = renewURL.split("?")[0];
+                        renewURL += "?boardType="+this.type;
+                        renewURL += "&page=1";
+                        //페이지 갱신 실행!
+                        history.pushState(null, null, renewURL);
+                    }
                     this.getList(1);
                 }
             }
@@ -141,8 +169,23 @@
                 this.type = element.value;
                 element.remove();
                 document.getElementById("type_"+this.type).classList.add("active");
-
-                this.getList(1);
+                const page = document.getElementById("initBoardPage");
+                if(page.value === "") {
+                    this.page = 1;
+                } else {
+                    this.page = page.value;
+                }
+                page.remove();
+                if(typeof(history.pushState) == 'function') {
+                    //현재 주소를 가져온다.
+                    var renewURL = location.href;
+                    renewURL = renewURL.split("?")[0];
+                    renewURL += "?boardType="+this.type;
+                    renewURL += "&page="+this.page;
+                    //페이지 갱신 실행!
+                    history.pushState(null, null, renewURL);
+                }
+                this.getList(this.page);
             }
         });
 
