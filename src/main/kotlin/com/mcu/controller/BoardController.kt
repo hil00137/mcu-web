@@ -43,7 +43,11 @@ class BoardController {
     @GetMapping("")
     fun goBoardList(request : HttpServletRequest): ModelAndView {
         val boardType = request.getParameter("boardType")
-        return ModelAndView("board/list").addObject("boardType",boardType?: BoardType.NOTIFICATION.type)
+        var boardPage = request.getParameter("page")
+        if(boardPage == "") {
+            boardPage = "1"
+        }
+        return ModelAndView("board/list").addObject("boardType",boardType?: BoardType.NOTIFICATION.type).addObject("page", boardPage)
     }
 
     /**
