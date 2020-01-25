@@ -38,8 +38,8 @@ class BoardService {
     /**
      * 해당 게시판의 해당 페이지 게시글
      */
-    @Cacheable(value = ["boardCache"])
-    fun getBoards(type : BoardType, page : Int): MutableList<Board> {
+    @Cacheable(value = ["boardListCache"])
+    fun getBoardsByType(type : BoardType, page : Int): MutableList<Board> {
         var resultPage : QueryResultPage<Board>? = null
         for (i in 0 .. page) {
             val last = resultPage?.lastEvaluatedKey?:HashMap<String, AttributeValue>()
