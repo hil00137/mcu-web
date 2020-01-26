@@ -81,5 +81,6 @@ enum class BoardType(val type: String,val kr : String) {
     SUGGESTION("suggestion","건의 게시판"),
     NOTIFICATION("notification","공지사항"),
     DEVELOPMENT("development","개발자 게시판"),
-    DAILYBOARD("dailyBoard","일상기")
+    DAILYBOARD("dailyBoard","일상기"),
+    FREEBOARD("freeBoard","자유 게시판")
 }
