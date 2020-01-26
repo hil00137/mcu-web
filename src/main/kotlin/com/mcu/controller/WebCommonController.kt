@@ -26,4 +26,10 @@ class WebCommonController {
     fun guide(): String {
         return "guide"
     }
+
+    @GetMapping("/plugin/se2/photoUploader")
+    fun goFileUploader() : String {
+
+        return "se2/photoUploader"
+    }
 }

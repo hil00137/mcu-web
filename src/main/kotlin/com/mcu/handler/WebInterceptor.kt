@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse
 class WebInterceptor : HandlerInterceptorAdapter() {
 
     companion object {
-        val logger = LoggerFactory.getLogger(this.javaClass)!!
+        val logger = LoggerFactory.getLogger(this::class.java)!!
     }
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {

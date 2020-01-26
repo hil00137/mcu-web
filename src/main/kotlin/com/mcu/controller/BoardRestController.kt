@@ -3,15 +3,14 @@ package com.mcu.controller
 import com.mcu.model.Board
 import com.mcu.model.BoardType
 import com.mcu.model.HistoryPriority
-import com.mcu.service.BoardArchiveService
-import com.mcu.service.BoardService
-import com.mcu.service.CommentService
-import com.mcu.service.HistoryService
+import com.mcu.service.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 
 @RestController
@@ -32,6 +31,8 @@ class BoardRestController {
     @Autowired
     lateinit var commentService : CommentService
 
+    @Autowired
+    lateinit var imageService : ImageService
     /**
      * 정해진 게시판의 page별로 게시글들을 가져옴. Caching
      */
@@ -72,17 +73,18 @@ class BoardRestController {
         val userId = SecurityContextHolder.getContext().authentication.principal as String
         if(board == null) {
             result["message"]="잘못된 접근입니다."
-            return result;
+            return result
         } else if (boardType == BoardType.NOTIFICATION || boardType == BoardType.DEVELOPMENT) {
             val list = SecurityContextHolder.getContext().authentication.authorities
             if(!list.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
                 result["message"]="잘못된 접근입니다."
                 historyService.writeHistory("Access is not allowed.[save board] from $userId", HistoryPriority.RULE_OVER)
-                return result;
+                return result
             }
         }
         board.userId = userId
         val boardId = boardService.saveBoard(board).id
+        imageService.saveImage(Board().also { it.id = "TEMP" }, board)
         historyService.writeHistory("Register new board by $userId", HistoryPriority.NEW_BOARD)
         result["message"] = "success"
         result["boardId"] = boardId!!
@@ -102,6 +104,7 @@ class BoardRestController {
         return if (board.userId == requestId ||
                 SecurityContextHolder.getContext().authentication.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) {
             boardService.deleteBoard(board)
+            imageService.deleteImageRelateBoard(board.id!!)
             boardArchiveService.deleteAll(board.id?:"")
             commentService.deleteAll(board.id?:"")
             historyService.writeHistory("delete board id : $id from $requestId", HistoryPriority.USER_REQUEST)
@@ -130,6 +133,7 @@ class BoardRestController {
             return "잘못된 접근입니다."
         }
         boardArchiveService.archiving(oriBoard, newBoard)
+        imageService.saveImage(oriBoard, newBoard)
         oriBoard.subject = newBoard.subject
         oriBoard.content = newBoard.content
         oriBoard.update = LocalDateTime.now()
@@ -144,13 +148,12 @@ class BoardRestController {
     fun getMyBoards(@PathVariable page : String) : Map<String, Any> {
         logger.info("Get My Boards : page : $page")
         val requestId = SecurityContextHolder.getContext().authentication.principal as String
-        var pageNum: Int
-        try {
-            pageNum = page.toInt()
+        val pageNum: Int = try {
+            page.toInt()
         } catch (e : IllegalArgumentException) {
             return HashMap()
         } catch (e : NumberFormatException) {
-            pageNum = 0
+            0
         }
 
         val result = HashMap<String, Any>()
@@ -158,5 +161,13 @@ class BoardRestController {
         result["list"] = boardService.getBoardsByUserId(requestId, pageNum)
         result["page"] = pageNum
         return result
+    }
+
+    /**
+     * 이미지 업로드
+     */
+    @PostMapping("/img/upload", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun upload(@RequestParam file : MultipartFile) : Map<String, String> {
+        return imageService.uploadObject(file)
     }
 }

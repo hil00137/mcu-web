@@ -10,6 +10,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder
+import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -30,6 +32,11 @@ class AwsConnector {
 
     private var dynamoDBMapper : DynamoDBMapper? = null
 
+    private var amazonS3 : AmazonS3? = null
+
+    /**
+     * EC2
+     */
     fun getEC2Connection() : AmazonEC2 {
         return if(amazonEC2 != null) {
             amazonEC2 as AmazonEC2
@@ -39,6 +46,9 @@ class AwsConnector {
         }
     }
 
+    /**
+     * DynamoDB
+     */
     fun getDynamoDBConnection(): AmazonDynamoDB {
         return if(amazonDynamoDB == null) {
             if (profile == "local") {
@@ -59,6 +69,18 @@ class AwsConnector {
             DynamoDBMapper(this.getDynamoDBConnection(), DynamoDBMapperConfig.DEFAULT)
         } else {
             dynamoDBMapper!!
+        }
+    }
+
+    /**
+     * S3
+     */
+    fun getS3Connection() : AmazonS3 {
+        return if(amazonS3 != null) {
+            amazonS3 as AmazonS3
+        } else {
+            amazonS3 = AmazonS3ClientBuilder.standard().withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey))).withRegion(Regions.AP_NORTHEAST_2).build()
+            amazonS3 as AmazonS3
         }
     }
 }
