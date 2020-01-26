@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.mcu"
-version = "0.5.5-SNAPSHOT"
+version = "0.5.6-RELEASE"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -27,6 +27,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic")
     implementation("com.sun.mail:javax.mail:1.6.2")
     implementation("org.apache.commons:commons-lang3:3.9")
+    implementation("commons-io:commons-io:2.6")
+    implementation("org.jsoup:jsoup:1.12.1")
     implementation("com.amazonaws:aws-java-sdk-ec2:1.11.675")
     implementation("com.amazonaws:aws-java-sdk-dynamodb:1.11.705")
     implementation("org.springframework:spring-aop")
