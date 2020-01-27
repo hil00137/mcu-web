@@ -64,14 +64,15 @@ class ImageService {
         metadata.contentType =  file.contentType
         metadata.contentLength = bytes.size.toLong()
 
+        val bucketName = awsConnector.bucket
         val byteInputStream = ByteArrayInputStream(bytes)
         val key = "$year/$month/$day/$uuid.$ext"
         try {
-            s3.putObject(PutObjectRequest("mcedu", key, byteInputStream, metadata))
+            s3.putObject(PutObjectRequest(bucketName, key, byteInputStream, metadata))
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        val fileUrl = s3.getUrl("mcedu", key).toString()
+        val fileUrl = s3.getUrl(bucketName, key).toString()
 
         val image = Image(key)
         image.boardId = "UNKNOWN"
@@ -95,7 +96,7 @@ class ImageService {
      * s3에서 image 파일 삭제
      */
     private fun deleteImage(key : String) {
-        this.awsConnector.getS3Connection().deleteObject("mcedu", key)
+        this.awsConnector.getS3Connection().deleteObject(awsConnector.bucket, key)
     }
 
     /**
@@ -148,7 +149,9 @@ class ImageService {
         val doc = Jsoup.parseBodyFragment(content)
         doc.getElementsByTag("img").forEach {el ->
             val temp = el.attr("src").split("/")
-            if(temp.size < 7) return result
+            if(temp.size != 7) return@forEach
+            val domain = temp[2]
+            if(!domain.contains(awsConnector.bucket))  return@forEach
             val year = temp[3]
             val month = temp[4]
             val day = temp[5]

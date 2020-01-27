@@ -21,10 +21,12 @@ class AwsConnector {
     @Value("\${spring.profiles}")
     private lateinit var profile : String
 
-    @Value("\${aws.access.key.id}")
+    @Value("\${aws.access.key}")
     private lateinit var accessKey : String
     @Value("\${aws.secret.key}")
     private lateinit var secretKey : String
+    @Value("\${aws.bucket}")
+    lateinit var bucket : String
 
     private var amazonEC2 : AmazonEC2? = null
 
