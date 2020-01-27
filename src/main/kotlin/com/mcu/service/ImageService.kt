@@ -6,6 +6,7 @@ import com.amazonaws.util.IOUtils
 import com.mcu.model.Board
 import com.mcu.model.HistoryPriority
 import com.mcu.model.Image
+import com.mcu.repository.BoardRepository
 import com.mcu.repository.ImageRepository
 import com.mcu.util.AwsConnector
 import org.jsoup.Jsoup
@@ -17,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 @Service
 class ImageService {
@@ -26,9 +29,13 @@ class ImageService {
     @Autowired
     private lateinit var imageRepository: ImageRepository
     @Autowired
+    private lateinit var boardRepository: BoardRepository
+    @Autowired
     private lateinit var historyService : HistoryService
 
     private val validExt = arrayOf("jpg", "png", "bmp", "gif")
+
+    private val newImageMarker = "NEW_IMAGE"
 
     /**
      * 이미지 파일 업로드
@@ -64,17 +71,18 @@ class ImageService {
         metadata.contentType =  file.contentType
         metadata.contentLength = bytes.size.toLong()
 
+        val bucketName = awsConnector.bucket
         val byteInputStream = ByteArrayInputStream(bytes)
         val key = "$year/$month/$day/$uuid.$ext"
         try {
-            s3.putObject(PutObjectRequest("mcedu", key, byteInputStream, metadata))
+            s3.putObject(PutObjectRequest(bucketName, key, byteInputStream, metadata))
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        val fileUrl = s3.getUrl("mcedu", key).toString()
+        val fileUrl = s3.getUrl(bucketName, key).toString()
 
         val image = Image(key)
-        image.boardId = "UNKNOWN"
+        image.boardId = newImageMarker
         image.regist = localDateTime
         image.url = fileUrl
         image.oriFileName = filename
@@ -95,7 +103,7 @@ class ImageService {
      * s3에서 image 파일 삭제
      */
     private fun deleteImage(key : String) {
-        this.awsConnector.getS3Connection().deleteObject("mcedu", key)
+        this.awsConnector.getS3Connection().deleteObject(awsConnector.bucket, key)
     }
 
     /**
@@ -105,7 +113,23 @@ class ImageService {
         val images = getOriImage(boardId)
         images.forEach {
             key ->
-            val image = this.imageRepository.findByKey(key)?: return
+            val image = this.imageRepository.findByKey(key)?: return@forEach
+            if(image.refBoardList!!.size != 0) {
+                val removeList = ArrayList<String>()
+                image.refBoardList!!.forEach inner@{
+                    boardId ->
+                    removeList.add(boardId)
+                    if(boardRepository.findById(boardId) != null) {
+                        image.boardId = boardId
+                        removeList.forEach {
+                            el ->
+                            image.refBoardList!!.remove(el)
+                        }
+                        this.imageRepository.save(image)
+                        return@forEach
+                    }
+                }
+            }
             this.imageRepository.delete(image)
             this.deleteImage(key)
         }
@@ -117,19 +141,29 @@ class ImageService {
     fun saveImage(oriBoard : Board, newBoard : Board) {
         val oriImages = getOriImage(oriBoard.id!!)
         val newImages = parseImage(newBoard.content)
-
+        val registBoardId = if(oriBoard.id == "TEMP") {
+            newBoard.id
+        } else {
+            oriBoard.id
+        }
         // 새글에서 이미지를 추출
         newImages.forEach {
             key ->            
             if(oriImages.contains(key)) {// 기존리스트에 이미 있는 이미지일 경우 (기존리스트에서 제거만)
                 oriImages.remove(key)
             } else {//기존리스트에 없는경우 boardId를 지정.
-                val image = this.imageRepository.findByKey(key) ?: return
-                if(oriBoard.id == "TEMP") {//새글 등록일경우
-                    image.boardId = newBoard.id
-                } else {//기존의 글 변경일 경우
-                    image.boardId = oriBoard.id
+                val image = this.imageRepository.findByKey(key) ?: return@forEach
+                if(image.boardId != newImageMarker) {
+                    if(image.refBoardList == null) {
+                        image.refBoardList = ArrayList()
+                    }
+                    if(image.refBoardList?.contains(oriBoard.id!!) == false) {
+                        image.refBoardList?.add(registBoardId ?: "")
+                    }
+                    imageRepository.save(image)
+                    return@forEach
                 }
+                image.boardId = registBoardId
                 this.imageRepository.save(image)
             }
         }
@@ -148,7 +182,9 @@ class ImageService {
         val doc = Jsoup.parseBodyFragment(content)
         doc.getElementsByTag("img").forEach {el ->
             val temp = el.attr("src").split("/")
-            if(temp.size < 7) return result
+            if(temp.size != 7) return@forEach
+            val domain = temp[2]
+            if(!domain.contains(awsConnector.bucket))  return@forEach
             val year = temp[3]
             val month = temp[4]
             val day = temp[5]
