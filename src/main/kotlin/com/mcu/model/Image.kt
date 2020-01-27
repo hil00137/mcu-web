@@ -25,5 +25,6 @@ class Image() {
     var oriFileName : String? = null
     @DynamoDBAttribute
     var contentType : String? = null
-
+    @DynamoDBAttribute
+    var refBoardList : ArrayList<String>? = null
 }
